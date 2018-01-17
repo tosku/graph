@@ -1,0 +1,79 @@
+-- This file has been generated from package.yaml by hpack version 0.20.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 8bb63f27a1239b658115019c596c9ea157fc0d7c499ee7ca62ecb24c2058a406
+
+name:           graph
+version:        0.1.0.0
+description:    Graph library
+homepage:       https://github.com/tosku/graph#readme
+bug-reports:    https://github.com/tosku/graph/issues
+author:         Thodoris Papakonstantinou
+maintainer:     mail@tpapak.com
+copyright:      2017 Thodoris Papakonstantinou
+license:        GPL-3
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    ChangeLog.md
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/tosku/graph
+
+library
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+  exposed-modules:     Data.Graph
+                     , Data.Graph.Grid
+                     , Test.Graph.Grid
+                     , Data.Graph.Network
+                     , Data.Graph.BFS
+                     , Test.Graph.BFS
+                     , Test.GrTest
+                     , Data.Graph.PushRelabel.Internal
+                     , Data.Graph.PushRelabel.Pure
+                     , Data.Graph.PushRelabel.STM
+  build-depends:       base >= 4.7 && < 5
+                     , ansi-terminal
+                     , mtl >= 2.2.1
+                     , natural-numbers >= 0.1.2.0
+                     , random
+                     , mersenne-random-pure64 >= 0.2.0.5
+                     , vector
+                     , stm >= 2.4.4.1
+                     , template-haskell >= 2.11.1.0
+                     , Unique
+                     , monad-par >= 0.3.4.8
+                     , containers >= 0.5.10.2
+                     , unix
+                     , async >= 2.1.1
+                     , aeson
+                     , aeson-pretty
+                     , text >= 1.2.2.2
+                     , async >= 2.1.1
+                     , bytestring
+                     , fgl >= 5.5.3.1
+                     , prng 
+                     , either-unwrap >= 1.1
+                     , stm >= 2.4.4.1
+                     , parallel >= 3.2.1.0
+                     , monad-parallel >= 0.7.2.2
+                     , monad-par-extras
+  default-language: Haskell2010
+
+test-suite graph-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , graph
+  default-language: Haskell2010
