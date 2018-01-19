@@ -9,12 +9,8 @@ Portability : POSIX
 
 
  -}
- {-# LANGUAGE MultiParamTypeClasses #-}
- {-# LANGUAGE FunctionalDependencies #-}
- {-# LANGUAGE FlexibleInstances #-}
 
-
-module Data.Graph.Network
+module Data.Graph.AdjacencyList.Network
   ( Network (..)
   , Capacity
   , Capacities
@@ -23,12 +19,11 @@ module Data.Graph.Network
 
 import Data.List
 import Data.Maybe
-import qualified Data.Vector as V
 import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Lazy as M
 import qualified Data.IntSet as Set
 
-import Data.Graph
+import Data.Graph.AdjacencyList
 
 type Capacity = Rational 
 type Capacities = M.Map Edge Capacity 

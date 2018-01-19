@@ -1,5 +1,5 @@
 {-|
-Module      : Graph
+Module      : Data.AdjacencyList.Graph
 Description : Class definitions
 
 Copyright   : Thodoris Papakonstantinou, 2016
@@ -11,7 +11,7 @@ Portability : POSIX
 Graph TypeClass definitions
  -}
 
-module Data.Graph
+module Data.Graph.AdjacencyList
     ( Natural
     , Vertex (..)
     , Edge (..)
@@ -118,7 +118,6 @@ adjacencyMap g = IM.fromList $ map (\v -> (v, (neighbors g v))) vs
 
 getReverseNeighbors :: [Vertex] -> [Edge] -> IM.IntMap [Vertex]
 getReverseNeighbors vs es = IM.fromList $ zip vs (map (\v -> map from (filter (\re -> to re == v) es)) vs)
-{-# getReverseNeighbors #-}
 
 reverseGraph :: Graph -> Graph
 reverseGraph g = Graph { vertices = vertices g

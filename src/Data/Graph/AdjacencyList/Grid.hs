@@ -15,7 +15,7 @@ following conventional vertex labeling.
 - d: dimensionality (2: square, 3: cubic, >3: hypercubic)
  -}
 
-module Data.Graph.Grid
+module Data.Graph.AdjacencyList.Grid
     ( Natural
     , L
     , D
@@ -33,9 +33,7 @@ module Data.Graph.Grid
     , graphCubicPBC
     ) where
 
-import qualified Data.Vector as V
-
-import Data.Graph
+import Data.Graph.AdjacencyList
 
 type L = Natural
 type D = Natural

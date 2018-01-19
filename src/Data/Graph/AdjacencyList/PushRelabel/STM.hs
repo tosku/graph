@@ -10,11 +10,8 @@ Portability : POSIX
 
  -}
 
-{-# LANGUAGE Rank2Types #-}
-{-# LANGUAGE BangPatterns #-}
-{-# OPTIONS_GHC -funbox-strict-fields #-}
 
-module Data.Graph.PushRelabel.STM
+module Graph.PushRelabel.STM
   (
     ResidualGraph (..)
   {-, pushRelabel-}
@@ -23,7 +20,6 @@ module Data.Graph.PushRelabel.STM
 
 import Data.List
 import Data.Maybe
-import qualified Data.Vector as V
 import qualified Data.Map.Lazy as M
 import qualified Data.IntMap.Lazy as IM
 import qualified Data.IntSet as Set
@@ -31,11 +27,11 @@ import qualified Control.Monad.Parallel as Par
 import Control.Concurrent.STM
 import Control.Monad
 
-import Data.Graph
-import Data.Graph.Network
-import Data.Graph.BFS
+import Graph
+import Graph.Network
+import Graph.BFS
 
-import Data.Graph.PushRelabel.Internal
+import Graph.PushRelabel.Internal
 
 
 data ResidualVertexSTM = ResidualVertexSTM Vertex (Level,Level) (TVar Height) (TVar Excess)

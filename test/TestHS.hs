@@ -1,5 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
-module Test.GrTest 
+module TestHS
     ( Test
     , runTest
     , reportTests
@@ -7,7 +6,6 @@ module Test.GrTest
     , testFailed
     ) where
 
-{-import Language.Haskell.TH-}
 import Data.Tuple
 import System.Console.ANSI
 import System.Exit

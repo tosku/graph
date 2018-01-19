@@ -1,28 +1,24 @@
-{-# LANGUAGE TemplateHaskell #-}
-module Test.Graph.BFS where
+module Test.Graph.AdjacencyList.BFS where
 
-import Language.Haskell.TH
 import Data.Maybe
 import Data.List
 import Data.List.Unique
-import Test.GrTest
-import qualified Data.Vector as V
+import TestHS
+
 import qualified Data.IntMap.Strict as IM
 import Data.Maybe
 
 import qualified Data.Graph.Inductive as I
 import qualified Data.Graph.Inductive.Graph as G
-import qualified Data.Graph.Inductive.Query.MaxFlow as MF
 import qualified Data.Graph.Inductive.Query.BFS as IBFS
 
-import Data.Graph
-import Data.Graph.BFS
-import Data.Graph.Grid
+import Data.Graph.AdjacencyList
+import Data.Graph.AdjacencyList.BFS
+import Data.Graph.AdjacencyList.Grid
 
 fastTests :: [Test]
 fastTests = [ 
               test2
-            {-, test3-}
             ]
 
 graphTest1 = Graph { vertices = [1..7]
@@ -48,13 +44,3 @@ test2 = do
    in case  out == expe of
         True -> testPassed name "passed!"
         False -> testFailed name $ (,) (show expe) (show out)
-
-{-test3 :: Test-}
-{-test3 = do-}
-  {-let name = "Test bfs and adjBFS should give the same results"-}
-      {-g = TestGraph1-}
-      {-out = level $ bfs graphTest1 1-}
-      {-expe = adjBFS g (adjacencyMap g) 1-}
-   {-in case  out == expe of-}
-        {-True -> testPassed name "passed!"-}
-        {-False -> testFailed name $ (,) (show expe) (show out)-}

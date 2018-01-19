@@ -1,13 +1,13 @@
-{-# LANGUAGE TemplateHaskell #-}
-module Test.Graph.Grid where
+module Test.Graph.AdjacencyList.Grid where
 
-import Language.Haskell.TH
 import Data.Bifunctor
-import Data.Graph
-import Data.Graph.Grid
 import Data.List
 import Data.List.Unique
-import Test.GrTest
+
+import TestHS
+
+import Data.Graph.AdjacencyList
+import Data.Graph.AdjacencyList.Grid
 
 fastTests :: [Test]
 fastTests = [ test2dpbc1

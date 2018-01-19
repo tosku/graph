@@ -14,7 +14,7 @@ Portability : POSIX
  {-# LANGUAGE FlexibleInstances #-}
 
 
-module Data.Graph.BFS
+module Data.Graph.AdjacencyList.BFS
   ( bfs
   , adjBFS
   , BFS (..)
@@ -22,11 +22,10 @@ module Data.Graph.BFS
 
 import Data.List
 import Data.Maybe
-import qualified Data.Vector as V
 import qualified Data.IntMap as IM
 import qualified Data.IntSet as Set
 
-import Data.Graph
+import Data.Graph.AdjacencyList
 
 data BFS = BFS { frontier :: Set.IntSet
                , level :: IM.IntMap Int -- ^ Keeps level of vertex

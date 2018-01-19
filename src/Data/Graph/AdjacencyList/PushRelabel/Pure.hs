@@ -14,7 +14,7 @@ Portability : POSIX
 {-# LANGUAGE BangPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 
-module Data.Graph.PushRelabel.Pure
+module Data.Graph.AdjacencyList.PushRelabel.Pure
   ( ResidualGraph (..)
   , Network (..)
   , pushRelabel
@@ -25,27 +25,21 @@ module Data.Graph.PushRelabel.Pure
 
 import Data.List
 import Data.Maybe
-import qualified Data.Vector as V
 import qualified Data.Map.Lazy as M
 import qualified Data.IntMap.Lazy as IM
 import qualified Data.IntSet as Set
-import qualified Control.Monad.Parallel as Par
 import Control.Monad
 
-import qualified Data.Graph.Inductive as I
-import qualified Data.Graph.Inductive.Graph as G
-import qualified Data.Graph.Inductive.Query.MaxFlow as MF
-import qualified Data.Graph.Inductive.Query.BFS as IBFS
+import Data.Graph.AdjacencyList
+import Data.Graph.AdjacencyList.Network
+import Data.Graph.AdjacencyList.PushRelabel.Internal
+import qualified Data.Graph.AdjacencyList.BFS as BFS
 
-import Data.Graph
-import Data.Graph.Network
-import Data.Graph.PushRelabel.Internal
-import qualified Data.Graph.BFS as BFS
-
+-- | Implementation of the push relabel algorithm
+-- works only on graphs with single direction
 pushRelabel :: Network -> Either String ResidualGraph
 pushRelabel net =
   let initg = initializeResidualGraph net
-  {-let res = initg-}
       res = argalios initg 0
       nvs = vertices $ graph $ network res
       s = source net
@@ -152,5 +146,3 @@ bfsRelabel rg =
   in rg''
   where
     g = graph $ network rg
-
-

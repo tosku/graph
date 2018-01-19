@@ -10,11 +10,7 @@ Portability : POSIX
 
  -}
 
-{-# LANGUAGE Rank2Types #-}
-{-# LANGUAGE BangPatterns #-}
-{-# OPTIONS_GHC -funbox-strict-fields #-}
-
-module Data.Graph.PushRelabel.Internal
+module Data.Graph.AdjacencyList.PushRelabel.Internal
   ( 
     Network (..)
   , ResidualGraph (..)
@@ -47,22 +43,13 @@ module Data.Graph.PushRelabel.Internal
 
 import Data.List
 import Data.Maybe
-import qualified Data.Vector as V
 import qualified Data.Map.Lazy as M
 import qualified Data.IntMap.Lazy as IM
 import qualified Data.IntSet as Set
-import qualified Control.Monad.Parallel as Par
-import Control.Monad
 
-import qualified Data.Graph.Inductive as I
-import qualified Data.Graph.Inductive.Graph as G
-import qualified Data.Graph.Inductive.Query.MaxFlow as MF
-import qualified Data.Graph.Inductive.Query.BFS as IBFS
-
-
-import Data.Graph.Network
-import Data.Graph
-import qualified Data.Graph.BFS as BFS
+import Data.Graph.AdjacencyList
+import Data.Graph.AdjacencyList.Network
+import qualified Data.Graph.AdjacencyList.BFS as BFS
 
 type Height = Int
 type Excess = Capacity
