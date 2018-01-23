@@ -32,8 +32,8 @@ module Data.Graph.AdjacencyList
     , numVertices
     , numEdges
     , outVertices
+    , neighborsMapFromEdges
     ) where
-
 
 import Data.List
 import Data.Maybe
@@ -95,7 +95,11 @@ instance Show Graph where
   show g = "vertices: " ++ show (vertices g) ++ "\n" ++
             "edges: " ++ show (edges g) ++ "\n"
 
-outVertices g v = map from $ filter (\e -> from e == v) (edges g)
+outVertices :: [Edge] -> Vertex -> [Vertex]
+outVertices es v = map from $ filter (\e -> from e == v) es
+
+neighborsMapFromEdges :: [Vertex] -> [Edge] -> IM.IntMap [Vertex]
+neighborsMapFromEdges vs es = IM.fromList $ zip vs (map (\v -> outVertices es v) vs)
 
 edgesFromNeighbors :: Graph -> [Edge]
 edgesFromNeighbors g = 

@@ -313,8 +313,8 @@ outflow g v =
       reds = map (\n -> fromTuple (v,n)) $ fst ns
    in foldl' (\ac e -> (ac + edgeFlow g e)) 0 reds 
 
-  -- | (distance from sink , distance from source (only those that don't connect
-  -- to sink))
+-- | (distance from sink , distance from source (only those that don't connect
+-- | to sink))
 residualDistances :: ResidualGraph -> (IM.IntMap Int, IM.IntMap Int)
 residualDistances rg = 
   let es = map snd (IM.toList $ netEdges rg)
