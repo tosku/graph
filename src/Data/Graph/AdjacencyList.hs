@@ -96,7 +96,7 @@ instance Show Graph where
             "edges: " ++ show (edges g) ++ "\n"
 
 outVertices :: [Edge] -> Vertex -> [Vertex]
-outVertices es v = map from $ filter (\e -> from e == v) es
+outVertices es v = map to $ filter (\e -> from e == v) es
 
 neighborsMapFromEdges :: [Vertex] -> [Edge] -> IM.IntMap [Vertex]
 neighborsMapFromEdges vs es = IM.fromList $ zip vs (map (\v -> outVertices es v) vs)
