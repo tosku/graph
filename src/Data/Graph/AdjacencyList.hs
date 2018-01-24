@@ -110,7 +110,11 @@ graphFromEdges es =
       !neimap = neighborsMapFromEdges vs es
       gr = Graph { vertices = vs
                  , edges = es
-                 , neighbors = (\v -> fromJust $ IM.lookup v neimap)
+                 , neighbors = (\v -> 
+                                 let mns = IM.lookup v neimap
+                                  in case mns of
+                                       Nothing -> []
+                                       Just ns -> ns)
                  , outEdges = (\v -> map (\n -> Edge v n) ((neighbors gr) v))
                  , edgeIndex = mapEdgeIndx gr
                  }
