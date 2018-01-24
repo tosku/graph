@@ -11,6 +11,7 @@ import Data.Graph.AdjacencyList.Grid
 
 fastTests :: [Test]
 fastTests = [ test1
+            , test2
             ]
 
 edgesTest1 = map fromTuple 
@@ -44,3 +45,11 @@ test1 = do
     True -> testPassed name "passed!"
     False -> testFailed name $ (,) (show graphTest1) (show gr1)
 
+test2 :: Test
+test2 = do
+  let name = "edges from Graph from edges"
+      gr1 = graphFromEdges edgesTest1
+      edfgr = edgesFromNeighbors graphTest1
+  case edgesTest1 == edfgr of
+    True -> testPassed name "passed!"
+    False -> testFailed name $ (,) (show edgesTest1) (show edfgr)
