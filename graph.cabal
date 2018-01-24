@@ -52,10 +52,10 @@ test-suite graph-test
   main-is: Spec.hs
   hs-source-dirs:
       test
-  other-modules:  Test.Graph.AdjacencyList.Grid
+  other-modules:  Test.Graph.AdjacencyList
+                , Test.Graph.AdjacencyList.Grid
                 , Test.Graph.AdjacencyList.BFS
                 , Test.Graph.AdjacencyList.PushRelabel.Pure
-                , TestHS
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5

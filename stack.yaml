@@ -3,7 +3,6 @@ packages:
 - .
 extra-deps:
 - natural-numbers-0.1.2.0
-#- archive: /home/tosku/Documents/tesths.zip
 - git: git@github.com:tosku/tesths
   commit: fead8353b72918241d306f57126bbb5fde4eeb5a
 allow-newer: true

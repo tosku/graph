@@ -33,6 +33,7 @@ module Data.Graph.AdjacencyList
     , numEdges
     , outVertices
     , neighborsMapFromEdges
+    , graphFromEdges
     ) where
 
 import Data.List
@@ -40,6 +41,7 @@ import Data.Maybe
 import Data.Natural
 import qualified Data.Map.Lazy as M
 import qualified Data.IntMap.Lazy as IM
+import qualified Data.Set as Set
 
 type Vertex = Int
 
@@ -100,6 +102,19 @@ outVertices es v = map to $ filter (\e -> from e == v) es
 
 neighborsMapFromEdges :: [Vertex] -> [Edge] -> IM.IntMap [Vertex]
 neighborsMapFromEdges vs es = IM.fromList $ zip vs (map (\v -> outVertices es v) vs)
+
+graphFromEdges :: [Edge] -> Graph
+graphFromEdges es = 
+  let !vs = Set.toList $ foldl' (\ac (Edge u v) ->
+             Set.insert u (Set.insert v ac)) Set.empty es
+      !neimap = neighborsMapFromEdges vs es
+      gr = Graph { vertices = vs
+                 , edges = es
+                 , neighbors = (\v -> fromJust $ IM.lookup v neimap)
+                 , outEdges = (\v -> map (\n -> Edge v n) ((neighbors gr) v))
+                 , edgeIndex = mapEdgeIndx gr
+                 }
+  in gr
 
 edgesFromNeighbors :: Graph -> [Edge]
 edgesFromNeighbors g = 
