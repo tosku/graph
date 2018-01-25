@@ -105,9 +105,9 @@ neighborsMapFromEdges vs es = IM.fromList $ zip vs (map (\v -> outVertices es v)
 
 graphFromEdges :: [Edge] -> Graph
 graphFromEdges es = 
-  let !vs = Set.toList $ foldl' (\ac (Edge u v) ->
+  let vs = Set.toList $ foldl' (\ac (Edge u v) ->
              Set.insert u (Set.insert v ac)) Set.empty es
-      !neimap = neighborsMapFromEdges vs es
+      neimap = neighborsMapFromEdges vs es
       gr = Graph { vertices = vs
                  , edges = es
                  , neighbors = (\v -> 
