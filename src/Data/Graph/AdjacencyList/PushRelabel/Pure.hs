@@ -6,9 +6,7 @@ License     : GPL-3
 Maintainer  : mail@tpapak.com
 Stability   : experimental
 Portability : POSIX
-
-
- -}
+|-}
 
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE BangPatterns #-}
@@ -71,14 +69,14 @@ pushRelabel net =
                         ++ " nevertices are " ++ show (netVertices res)
 
 argalios :: ResidualGraph -> Int -> ResidualGraph 
-argalios !rg steps = 
+argalios rg steps = 
   let g = graph $ network rg
       s = source $ network rg
       t = sink $ network rg
       es = edges g
       vs = vertices g
       olf = netFlow rg
-      !rg' = prePush $ prePull $ bfsRelabel rg
+      rg' = prePush $ prePull $ bfsRelabel rg
       nfl = netFlow rg'
       steps' = steps + 1
       oovfls = overflowing rg
