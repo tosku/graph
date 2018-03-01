@@ -8,9 +8,7 @@ Stability   : experimental
 Portability : POSIX
 |-}
 
-{-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE BangPatterns #-}
-{-# OPTIONS_GHC -funbox-strict-fields #-}
 
 module Data.Graph.AdjacencyList.PushRelabel.Pure
   ( ResidualGraph (..)
@@ -44,7 +42,7 @@ pushRelabel net =
       t = sink net
       insouts = filter (\v -> v /= s && v /= t && inflow res v < outflow res v) nvs
       xsflows = filter (\v -> v /= s && v /= t && inflow res v - outflow res v /= excess res v) nvs
-      ofvs = IM.foldl (\ac ovs -> Set.union ac ovs) Set.empty $ overflowing res
+      ofvs = IM.foldr (\ovs ac -> Set.union ac ovs) Set.empty $ overflowing res
       notofvs = filter (\ ov -> 
                           let (ResidualVertex v l h x) = fromJust (IM.lookup ov (netVertices res)) 
                               ml = (IM.lookup l (overflowing res)) 
@@ -70,13 +68,14 @@ pushRelabel net =
 
 argalios :: ResidualGraph -> Int -> ResidualGraph 
 argalios rg steps = 
-  let g = graph $ network rg
+  let g = rg `seq` (graph $ network rg)
       s = source $ network rg
       t = sink $ network rg
       es = edges g
       vs = vertices g
       olf = netFlow rg
-      rg' = prePush $ prePull $ bfsRelabel rg
+      bfsrg = bfsRelabel rg
+      rg' = prePush $ prePull bfsrg 
       nfl = netFlow rg'
       steps' = steps + 1
       oovfls = overflowing rg
@@ -87,7 +86,6 @@ argalios rg steps =
               then rg' {steps = steps'}
               else argalios rg' steps'
          else argalios rg' steps'
-{-# INLINE argalios #-}
 
 -- | pushes flow though edges with starting vertices which are the ends of source edges 
 -- (U) and ending edges that are the start of sink edges (V)
@@ -133,14 +131,13 @@ pullNeighbors g v =
 
 bfsRelabel :: ResidualGraph -> ResidualGraph
 bfsRelabel rg =
-  let sh = numVertices g
+  let g = graph $ network rg
+      sh = numVertices g
       (slvs,tlvs) = residualDistances rg
-      rg' = foldl' (\ ac (v,l) -> 
+      rg' = IM.foldrWithKey (\ v l ac -> 
              let h = sh + l
               in updateHeight ac v h
-                ) rg $ IM.toList slvs 
-      rg'' = foldl' (\ ac (v,h) -> updateHeight ac v h
-                    ) rg' $ IM.toList tlvs
-  in rg''
-  where
-    g = graph $ network rg
+                ) rg slvs 
+   in IM.foldrWithKey (\ v h ac
+       -> updateHeight ac v h) 
+       rg' tlvs

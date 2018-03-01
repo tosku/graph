@@ -6,9 +6,7 @@ License     : GPL-3
 Maintainer  : mail@tpapak.com
 Stability   : experimental
 Portability : POSIX
-
-
- -}
+|-}
 
 module Data.Graph.AdjacencyList.Network
   ( Network (..)
@@ -19,7 +17,6 @@ module Data.Graph.AdjacencyList.Network
 
 import Data.List
 import Data.Maybe
-import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Lazy as M
 import qualified Data.IntSet as Set
 

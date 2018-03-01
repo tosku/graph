@@ -7,8 +7,9 @@ Maintainer  : mail@tpapak.com
 Stability   : experimental
 Portability : POSIX
 
+|-}
 
- -}
+{-# LANGUAGE BangPatterns #-}
 
 module Data.Graph.AdjacencyList.PushRelabel.Internal
   ( 
@@ -55,7 +56,7 @@ type Height = Int
 type Excess = Capacity
 type Level = Int
 
-data ResidualVertex = ResidualVertex Vertex Level Height Excess
+data ResidualVertex = ResidualVertex !Vertex !Level !Height !Excess
   deriving (Eq)
 instance Show ResidualVertex where
   show (ResidualVertex v l h x) =
@@ -63,6 +64,7 @@ instance Show ResidualVertex where
       show l ++ " height: " ++
       show h ++ " excess: " ++
       show (fromRational x :: Double)
+
 type ResidualVertices = IM.IntMap ResidualVertex
 
 data ResidualEdge = ResidualEdge Edge Capacity Flow
@@ -80,12 +82,12 @@ type NeighborsMap = IM.IntMap ([Vertex], [Vertex])
 
 type Overflowing = IM.IntMap Set.IntSet
 
-data ResidualGraph = ResidualGraph { network :: Network
-                                   , netVertices :: ResidualVertices
-                                   , netEdges :: ResidualEdges 
-                                   , netNeighborsMap :: NeighborsMap 
-                                   , overflowing :: Overflowing
-                                   , steps :: Int
+data ResidualGraph = ResidualGraph { network :: !Network
+                                   , netVertices :: !ResidualVertices
+                                   , netEdges :: !ResidualEdges 
+                                   , netNeighborsMap :: !NeighborsMap 
+                                   , overflowing :: !Overflowing
+                                   , steps :: !Int
                                    }
                        deriving (Show,Eq)
 
@@ -215,13 +217,15 @@ pull g e =
 updateHeight :: ResidualGraph -> Vertex -> Height -> ResidualGraph
 updateHeight g v nh =
   let netvs = netVertices g
-      nv = fromJust $ IM.lookup v netvs
-      x = excess g v
-      l = level g v
-      s = source $ network g
-      t = sink $ network g
-  in if v == t || v == s then g
-                         else g { netVertices = IM.adjust (const (ResidualVertex v l nh x)) v netvs }
+      !nv = fromJust $ IM.lookup v netvs
+      !x = excess g v
+      !l = level g v
+      !s = source $ network g
+      !t = sink $ network g
+      !nnetv = IM.update (\_ -> Just (ResidualVertex v l nh x)) v netvs
+  in if v == t || v == s 
+        then g
+        else g { netVertices = nnetv }
 
 updateExcess :: ResidualGraph -> Vertex -> Excess -> ResidualGraph
 updateExcess g v nx =
@@ -363,7 +367,8 @@ residualDistances rg =
 -- | gives st partition 
 stCut :: ResidualGraph -> ([Vertex],[Vertex])
 stCut rg = 
-  let ts = Set.delete s $ Set.delete t $ Set.fromList $ map fst (IM.toList (snd $ residualDistances rg))
+  let !resdis = residualDistances rg
+      ts = Set.delete s $ Set.delete t $ Set.fromList $ map fst (IM.toList (snd resdis))
       g = graph $ network rg
       s = source $ network rg
       t = sink $ network rg
