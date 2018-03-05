@@ -34,8 +34,6 @@ graphTest1 = Graph { vertices = [1..7]
                                        in nei v
                                  )
                    , edges = edgesFromNeighbors graphTest1
-                   , edgeIndex = mapEdgeIndx graphTest1
-                   , outEdges = (\v -> map (\n -> Edge v n) (neighbors graphTest1 v))
                    }
 test1 :: Test
 test1 = do

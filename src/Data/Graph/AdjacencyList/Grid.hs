@@ -26,14 +26,18 @@ module Data.Graph.AdjacencyList.Grid
     , cVertexToVertex
     , PBCSquareLattice (..)
     , pbcEdgeIx
-    , mapEdgeIndx
     , gridSize
     , gridNumEdges
+    , pbcForwardEdges
     , pbcBackwardEdges
+-- * Undirected cubic graph with PBC
+    , undirectedGraphCubicPBC
+-- * Directed cubic graph with PBC
     , graphCubicPBC
     ) where
 
 import Data.Graph.AdjacencyList
+import Data.List
 
 type L = Natural
 type D = Natural
@@ -56,14 +60,22 @@ instance Show PBCSquareLattice where
                     " numVertices : " ++ show (gridN l d) ++ "\n" ++
                       " numEdges : " ++ show (gridNumEdges (PBCSquareLattice l d))
 
-graphCubicPBC :: PBCSquareLattice -> Graph
-graphCubicPBC (PBCSquareLattice l d) = Graph
+undirectedGraphCubicPBC :: PBCSquareLattice -> Graph
+undirectedGraphCubicPBC (PBCSquareLattice l d) = Graph
     { vertices = gridVertices l d
-    , edges = pbcEdges l d 
     , neighbors = pbcNeighbors l d 
-    , edgeIndex = pbcEdgeIx l d 
-    , outEdges  = pbcForwardEdges l d 
+    , edges = edgesFromNeighbors 
+      $ undirectedGraphCubicPBC (PBCSquareLattice l d)
     } 
+
+-- | Directed graph embeded in cubic lattice
+graphCubicPBC :: PBCSquareLattice -> Graph
+graphCubicPBC (PBCSquareLattice l d) = 
+  let es = foldl' (++) [] 
+             $ map 
+              (pbcForwardEdges l d) 
+              (gridVertices l d)
+   in graphFromEdges es
 
 gridNumEdges (PBCSquareLattice l d) = d * (gridN l d)
 
@@ -79,31 +91,24 @@ gridVertices l d = [1 .. (fromEnum l ^ fromEnum d)]
 
 -- | Returns the next vertex of v in the d dimension for a grid of side l
 pbcNeighbor :: Vertex -> L -> D -> Direction -> Vertex
-pbcNeighbor v l d r  | r == Forward =
-                      if not $! isBoundary v l d
-                        then v + innerOffset l d
-                        else v + pbcOffset l d 
-                    | r == Backward =
-                      if not $ isBoundary (v - innerOffset l d) l d
-                        then v - innerOffset l d
-                        else v - pbcOffset l d
-
-{-# INLINE pbcNeighbor #-}
-
-innerOffset :: L -> D -> Vertex
-innerOffset l' d' = l^(d - 1)
-  where l = fromEnum l'
-        d = fromEnum d'
-
-pbcOffset :: L -> D -> Vertex
-pbcOffset l' d' = - l^d + l^(d - 1)
-  where l = fromEnum l'
-        d = fromEnum d'
-
-isBoundary :: Vertex -> L -> D -> Bool
-isBoundary v l' d' = (l^d) - (l^(d - 1)) - mod (v - 1) (l^d) <= 0
-  where l = fromEnum l'
-        d = fromEnum d'
+pbcNeighbor v l d r 
+  | r == Forward =
+    if not $! isBoundary v l d
+      then v + innerOffset l d
+      else v + pbcOffset l d 
+  | r == Backward =
+    if not $ isBoundary (v - innerOffset l d) l d
+      then v - innerOffset l d
+      else v - pbcOffset l d
+  where
+    l' = fromEnum l
+    d' = fromEnum d
+    innerOffset :: L -> D -> Vertex
+    innerOffset l d = l'^(d' - 1)
+    pbcOffset :: L -> D -> Vertex
+    pbcOffset l d = - l'^d + l'^(d' - 1)
+    isBoundary :: Vertex -> L -> D -> Bool
+    isBoundary v l d = (l'^d') - (l'^(d' - 1)) - mod (v - 1) (l'^d') <= 0
 
 -- | Given vertex returns list of nearest neighboring vertices on a Toroidal Boundary Conditions (pbc) grid
 pbcNeighbors :: L -> D -> Vertex -> [Vertex]
@@ -165,10 +170,6 @@ pbcAdjacentEdges l d v = (\r d ->
             Backward -> Edge (pbcNeighbor v l d r) v
   ) 
   <$> [Forward,Backward] <*> [1 .. d]
-
--- | List of edges of grid with periodic boundary conditions
-pbcEdges :: L -> D -> [Edge]
-pbcEdges l d = (\v j-> Edge v (pbcNeighbor v l j Forward)) <$> gridVertices l d <*> [1 .. d]
 
 -- | Index of edge of a grid with periodic boundary conditions
 -- Very inefficient, better use Data.Map for lookups.

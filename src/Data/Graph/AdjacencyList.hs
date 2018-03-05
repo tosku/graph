@@ -25,7 +25,7 @@ module Data.Graph.AdjacencyList
     , adjacentEdges
     , edgesFromNeighbors
     , adjacencyMap
-    , mapEdgeIndx
+    , edgeIndex
     , edgeMap
     , from
     , to
@@ -54,6 +54,18 @@ instance Show Edge where
 instance Eq Edge where
   a == b = from a == from b && to a == to b
 
+-- | Graph definition both directed and undirected
+data Graph = Graph { vertices :: [Vertex]
+  -- | edges should be unique even if graph is undirected
+                   , edges :: [Edge]
+  -- | out vertices for directed and all neighbors for undirected graphs
+                   , neighbors :: Vertex -> [Vertex]  
+                   }
+
+-- | gives the position of the edge to the edges list
+edgeIndex :: Graph -> Edge -> Maybe Int
+edgeIndex g e = M.lookup e $ edgeMap g
+
 from :: Edge -> Vertex
 from (Edge s t) = s
 
@@ -77,17 +89,6 @@ numVertices g = length $ vertices g
 numEdges :: Graph -> Int
 numEdges g = length $ edges g
 
--- | Graph definition both directed and undirected
-data Graph = Graph { vertices :: [Vertex]
-  -- | edges should be unique even if graph is undirected
-                   , edges :: [Edge]
-  -- | out vertices for directed and all neighbors for undirected graphs
-                   , neighbors :: Vertex -> [Vertex]  
-  -- | traverse all edges uniquely by traversing on the vertices 
-                   , outEdges :: Vertex -> [Edge] 
-  -- | gives the position of the edge to the edges list
-                   , edgeIndex :: Edge -> Maybe Int
-                   }
 
 instance Eq Graph where
   (==) g1 g2 = (sort (vertices g1) == sort (vertices g2))
@@ -115,8 +116,6 @@ graphFromEdges es =
                                   in case mns of
                                        Nothing -> []
                                        Just ns -> ns)
-                 , outEdges = (\v -> map (\n -> Edge v n) ((neighbors gr) v))
-                 , edgeIndex = mapEdgeIndx gr
                  }
   in gr
 
@@ -132,9 +131,6 @@ adjacentEdges g v = map (\n -> Edge v n) $ neighbors g v
 edgeMap :: Graph -> M.Map Edge Int
 edgeMap g = M.fromList (zip (edges g) [1..]) :: M.Map Edge Int
 
-mapEdgeIndx :: Graph -> Edge -> Maybe Int
-mapEdgeIndx g e = M.lookup e $ edgeMap g
-
 adjacencyMap :: Graph -> IM.IntMap [Vertex]
 adjacencyMap g = IM.fromList $ map (\v -> (v, (neighbors g v))) vs
                  where vs = vertices g
@@ -146,6 +142,4 @@ reverseGraph :: Graph -> Graph
 reverseGraph g = Graph { vertices = vertices g
                        , edges = reverseEdges g
                        , neighbors = (\v -> fromJust (IM.lookup v (getReverseNeighbors (vertices g) (edges g))))
-                       , outEdges = (\v -> map (\n -> Edge v n) ((neighbors (reverseGraph g)) v))
-                       , edgeIndex = mapEdgeIndx $ reverseGraph g
                        }

@@ -9,9 +9,9 @@ Portability : POSIX
 
 
  -}
- {-# LANGUAGE MultiParamTypeClasses #-}
- {-# LANGUAGE FunctionalDependencies #-}
- {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 
 module Data.Graph.AdjacencyList.BFS
@@ -53,12 +53,22 @@ bfs g s = breadthFirstSearch sbfs
                   newLevel = oldLevel + 1
                   oldLevels = level b
                   oldFrontiers = frontier b
-                  frontPar = let toCheck = Set.foldr (\v ac-> ac ++ (zip (neighbors g v) (repeat v))) [] oldFrontiers
-                              in filter (\(n,p) -> not $ IM.member n oldLevels) toCheck
+                  frontPar = 
+                    let toCheck = 
+                          Set.foldr 
+                            (\v ac-> ac ++ (zip (neighbors g v) (repeat v))) 
+                            [] oldFrontiers
+                     in filter (\(n,p) -> not $ IM.member n oldLevels) toCheck
                   newFrontiers = Set.fromList $ map fst frontPar
                   oldParents = parent b
-                  newParents = foldl' (\ac (n,p) -> IM.insert n p ac) oldParents frontPar
-                  newLevels = Set.foldl' (\ac v -> IM.insert v newLevel ac) oldLevels newFrontiers
+                  newParents = 
+                   foldl' 
+                     (\ac (n,p) -> IM.insert n p ac) 
+                     oldParents frontPar
+                  newLevels = 
+                    Set.foldl' 
+                      (\ac v -> IM.insert v newLevel ac) 
+                      oldLevels newFrontiers
                   bbfs = breadthFirstSearch (b { frontier = newFrontiers
                              , level = newLevels 
                              , parent = newParents
@@ -80,12 +90,20 @@ adjBFS neimap s = breadthFirstSearch sbfs
                   newLevel = oldLevel + 1
                   oldLevels = level b
                   oldFrontiers = frontier b
-                  frontPar = let toCheck = Set.foldr (\v ac-> ac ++ (zip (neighbors v) (repeat v))) [] oldFrontiers
-                              in filter (\(n,p) -> not $ IM.member n oldLevels) toCheck
+                  frontPar = 
+                    let toCheck = 
+                          Set.foldr 
+                            (\v ac-> ac ++ (zip (neighbors v) (repeat v))) 
+                            [] oldFrontiers
+                     in filter (\(n,p) -> not $ IM.member n oldLevels) toCheck
                   newFrontiers = Set.fromList $ map fst frontPar
                   oldParents = parent b
-                  newParents = foldl' (\ac (n,p) -> IM.insert n p ac) oldParents frontPar
-                  newLevels = Set.foldl' (\ac v -> IM.insert v newLevel ac) oldLevels newFrontiers
+                  newParents = foldl' 
+                                 (\ac (n,p) -> IM.insert n p ac) 
+                                 oldParents frontPar
+                  newLevels = Set.foldl' 
+                                 (\ac v -> IM.insert v newLevel ac) 
+                                 oldLevels newFrontiers
                   bbfs = breadthFirstSearch (b { frontier = newFrontiers
                              , level = newLevels 
                              , parent = newParents

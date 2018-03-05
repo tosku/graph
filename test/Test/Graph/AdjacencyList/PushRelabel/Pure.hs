@@ -37,8 +37,6 @@ graphTest1 = Graph { vertices = [1..7]
                                        in nei v
                                  )
                    , edges = edgesFromNeighbors graphTest1
-                   , edgeIndex = mapEdgeIndx graphTest1
-                   , outEdges = (\v -> map (\n -> Edge v n) (neighbors graphTest1 v))
                    }
   
 
@@ -65,34 +63,3 @@ test1 = do
         case netout == fglout of
           True -> testPassed name $ "passed!" ++ (show expe)
           False -> testFailed name $ (,) (show fglout) (show netout)
-
-{-test2 :: Test-}
-{-test2 = do-}
-  {-let name = "cubic lattice with random capacities"-}
-  {-let l    = (20 :: L)-}
-  {-let d    = (3 :: D)-}
-  {-let lattice = graphCubicPBC (PBCSquareLattice l d)-}
-  {-let cubnet = Network { graph = lattice-}
-                       {-, source = 1-}
-                       {-, sink = 7-}
-                       {-, capacities = -}
-                           {-M.fromList -}
-                           {-$ zip (edges (graph cubnet)) (map toRational $ repeat 1.1)-}
-                       {-, flow = M.empty-}
-                       {-}-}
-  {-let eout = pushRelabel cubnet-}
-  {-let vs = map (\v -> (v,())) $ vertices (graph cubnet) :: [G.UNode]-}
-  {-let es = map (\(f,t) -> (f,t,1.2)) $ (map toTuple (edges lattice)) :: [G.LEdge Double]-}
-  {-let mfg = G.mkGraph vs es :: I.Gr () Double-}
-  {-let expe = MF.maxFlow mfg 1 7 :: Double-}
-  {-case eout of-}
-    {-Left err -> testFailed name ("push relabel error", err)-}
-    {-Right out -> do-}
-        {-let netout = netFlow out-}
-        {-{-let fglout = toRational expe-}-}
-        {-{-case netout == fglout of-}-}
-        {-case netout == 1.3 of-}
-          {-True -> testPassed name "passed!"-}
-          {-{-False -> testFailed name $ (,) (show fglout) (show netout)-}-}
-          {-False -> testFailed name $ (,) ("LKJ") (show netout)-}
-
