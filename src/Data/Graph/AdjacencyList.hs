@@ -11,29 +11,33 @@ Portability : POSIX
 Graph TypeClass definitions
  -}
 
+{-# LANGUAGE BangPatterns #-}  
+
 module Data.Graph.AdjacencyList
     ( Natural
     , Vertex (..)
     , Edge (..)
+    , Neighbors (..)
+    , EdgeMap (..)
     , Graph (..)
     , fromTuple
     , toTuple
+    -- * Graph constructor
+    , createGraph
+    -- * Graph constructor from edge list
+    , graphFromEdges
+    , edges
     , reverseEdge
     , reverseEdges
-    , getReverseNeighbors
     , reverseGraph
     , adjacentEdges
     , edgesFromNeighbors
     , adjacencyMap
     , edgeIndex
-    , edgeMap
     , from
     , to
     , numVertices
     , numEdges
-    , outVertices
-    , neighborsMapFromEdges
-    , graphFromEdges
     ) where
 
 import Data.List
@@ -54,17 +58,30 @@ instance Show Edge where
 instance Eq Edge where
   a == b = from a == from b && to a == to b
 
--- | Graph definition both directed and undirected
+type EdgeMap = M.Map Edge Int
+
+-- | Takes vertex and outputs neighboring vertices
+type Neighbors = (Vertex -> [Vertex])
+
+-- | Graph definition of directed Graphs 
+-- undirected graphs should include reverse edges
 data Graph = Graph { vertices :: [Vertex]
-  -- | edges should be unique even if graph is undirected
-                   , edges :: [Edge]
-  -- | out vertices for directed and all neighbors for undirected graphs
-                   , neighbors :: Vertex -> [Vertex]  
+  -- | The edge map is necessary for appointing edge attributes
+                   , edgeMap :: EdgeMap
+                   , neighbors :: Neighbors
                    }
 
 -- | gives the position of the edge to the edges list
 edgeIndex :: Graph -> Edge -> Maybe Int
 edgeIndex g e = M.lookup e $ edgeMap g
+
+edges :: Graph -> [Edge]
+edges g = 
+  fmap fst $ M.toList $ edgeMap g
+
+edgeMapFromEdges :: [Edge] -> EdgeMap
+edgeMapFromEdges es =
+  M.fromList $ zip es [1..]
 
 from :: Edge -> Vertex
 from (Edge s t) = s
@@ -82,7 +99,7 @@ reverseEdge :: Edge -> Edge
 reverseEdge (Edge s t) = Edge t s
 
 reverseEdges :: Graph -> [Edge]
-reverseEdges g = map reverseEdge $ edges g
+reverseEdges g = fmap reverseEdge $ edges g
 
 numVertices :: Graph -> Int
 numVertices g = length $ vertices g
@@ -98,48 +115,54 @@ instance Show Graph where
   show g = "vertices: " ++ show (vertices g) ++ "\n" ++
             "edges: " ++ show (edges g) ++ "\n"
 
-outVertices :: [Edge] -> Vertex -> [Vertex]
-outVertices es v = map to $ filter (\e -> from e == v) es
-
-neighborsMapFromEdges :: [Vertex] -> [Edge] -> IM.IntMap [Vertex]
-neighborsMapFromEdges vs es = IM.fromList $ zip vs (map (\v -> outVertices es v) vs)
+-- | The canonical graph constructor
+createGraph :: [Vertex] -> Neighbors -> Graph
+createGraph vs neis =
+  let emap = edgeMapFromEdges $ edgesFromNeighbors neis vs
+   in Graph { vertices = vs
+            , neighbors = neis
+            , edgeMap = emap
+            }
 
 graphFromEdges :: [Edge] -> Graph
 graphFromEdges es = 
   let vs = Set.toList $ foldl' (\ac (Edge u v) ->
              Set.insert u (Set.insert v ac)) Set.empty es
-      neimap = neighborsMapFromEdges vs es
-      gr = Graph { vertices = vs
-                 , edges = es
-                 , neighbors = (\v -> 
-                                 let mns = IM.lookup v neimap
-                                  in case mns of
-                                       Nothing -> []
-                                       Just ns -> ns)
-                 }
-  in gr
+      esmap = edgeMapFromEdges es
+      neimap = IM.fromList 
+                  $ fmap 
+                    (\v -> 
+                      let nes = fmap to 
+                                $ M.keys 
+                                  $ M.filterWithKey 
+                                    (\e _ -> from e == v) 
+                                    esmap
+                       in (v, nes))
+                    vs
+      neis = (\v -> 
+                 let mns = IM.lookup v neimap
+                  in case mns of
+                       Nothing -> []
+                       Just ns -> ns)
+   in Graph { vertices = vs
+            , edgeMap = esmap
+            , neighbors = neis
+            }
 
-edgesFromNeighbors :: Graph -> [Edge]
-edgesFromNeighbors g = 
-  foldl (\ac v -> 
-    ac ++ map (\n -> Edge v n) (neighbors g v)
-        ) [] $ vertices g
+edgesFromNeighbors :: Neighbors -> [Vertex] -> [Edge]
+edgesFromNeighbors neis vs = 
+  let allneis = fmap (\v -> (v,neis v)) vs
+   in foldr (\(v,nv) ac -> 
+             (fmap (\n -> Edge v n) nv) ++ ac
+             ) [] allneis
 
 adjacentEdges :: Graph -> Vertex -> [Edge]
-adjacentEdges g v = map (\n -> Edge v n) $ neighbors g v
-
-edgeMap :: Graph -> M.Map Edge Int
-edgeMap g = M.fromList (zip (edges g) [1..]) :: M.Map Edge Int
+adjacentEdges g v = fmap (\n -> Edge v n) $ neighbors g v
 
 adjacencyMap :: Graph -> IM.IntMap [Vertex]
-adjacencyMap g = IM.fromList $ map (\v -> (v, (neighbors g v))) vs
+adjacencyMap g = IM.fromList $ fmap (\v -> (v, (neighbors g v))) vs
                  where vs = vertices g
 
-getReverseNeighbors :: [Vertex] -> [Edge] -> IM.IntMap [Vertex]
-getReverseNeighbors vs es = IM.fromList $ zip vs (map (\v -> map from (filter (\re -> to re == v) es)) vs)
-
 reverseGraph :: Graph -> Graph
-reverseGraph g = Graph { vertices = vertices g
-                       , edges = reverseEdges g
-                       , neighbors = (\v -> fromJust (IM.lookup v (getReverseNeighbors (vertices g) (edges g))))
-                       }
+reverseGraph g =
+  graphFromEdges $ reverseEdges g

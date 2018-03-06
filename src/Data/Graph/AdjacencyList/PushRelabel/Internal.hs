@@ -115,9 +115,11 @@ initializeResidualGraph net =
 
 getNetNeighborsMap :: Graph -> NeighborsMap
 getNetNeighborsMap g =
-  let revneis = getReverseNeighbors (vertices g) (edges g)
-      neis v = (neighbors g v, fromJust (IM.lookup v revneis))
-   in foldl (\ac v -> IM.insert v (neis v) ac) IM.empty (vertices g)
+  let revgraph = reverseGraph g
+      neis v = (neighbors g v, neighbors revgraph v)
+   in foldl' 
+        (\ac v -> IM.insert v (neis v) ac) 
+        IM.empty (vertices g)
 
 netNeighbors :: NeighborsMap -> Vertex -> ([Vertex],[Vertex]) -- ^ graph and reverse (inward and outward) neighbors
 netNeighbors nm v = fromJust $ IM.lookup v nm

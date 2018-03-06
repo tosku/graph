@@ -5,6 +5,8 @@ module Test.Graph.AdjacencyList.Grid where
 import Data.Bifunctor
 import Data.List
 import Data.List.Unique
+import Data.Maybe
+import qualified Data.Map.Lazy as M
 
 import TestHS
 
@@ -17,10 +19,10 @@ fastTests = [ test2dpbc1
             , test3dpbc1
             , test3dpbc2
             , test4dpbc1
-            , test2dedges
             , testforwards
             , vertexToCVertexToVertex
-            , testEdge
+            , testEdgeUndir
+            , testEdgeDir
             ]
 
 test2dpbc1 :: Test
@@ -69,16 +71,6 @@ test4dpbc1 = do
     True -> testPassed name "passed!"
     False -> testFailed name $ (bimap <$> id <*> id) show (neigh1, out)
 
-test2dedges :: Test
-test2dedges = do
-  let name = "Edges of pbcsql L=3 D=2"
-      expe = [(1,2),(1,4),(2,3),(2,5),(3,1),(3,6),(4,5),(4,7),(5,6),(5,8),(6,4),(6,9),(7,8),(7,1),(8,9),(8,2),(9,7),(9,3)]
-      out = map toTuple $ edges $ (graphCubicPBC (PBCSquareLattice  (3 :: L) (2 :: D)))
-  case out == expe of
-    True -> testPassed name "passed!"
-    False -> testFailed name $ (bimap <$> id <*> id) show (expe, out)
-
-
 testforwards :: Test
 testforwards = do
   let name = "Edges of pbcsql L=3 D=2"
@@ -102,18 +94,28 @@ vertexToCVertexToVertex = do
     True -> testPassed name $ "passed!"
     False -> testFailed name $ (bimap <$> id <*> id) (show . take 10) (vs, vs')
 
-testEdge :: Test
-testEdge = do
-  let name = "Edges to ids"
-      l    = (20 :: L)
+testEdgeUndir :: Test
+testEdgeUndir = do
+  let name = "grid undirected Edges to ids"
+      l    = (10 :: L)
       d    = (2 :: D)
-      !lattice = undirectedGraphCubicPBC (PBCSquareLattice l d)
-      !es = edges lattice
-      !eids = map (edgeIndex lattice) es
-      {-eids = map (pbcEdgeIx l d) es-}
-      expe :: [Maybe Int]
-      expe = map pure [1 .. length es]
+      lattice = undirectedGraphCubicPBC (PBCSquareLattice l d)
+      es = edges lattice
+      eids = M.fromList $ zip es $ map (\e -> fromJust (edgeIndex lattice e)) es
+      expe = edgeMap lattice
   case eids == expe of
     True -> testPassed name "passed!"
-    False -> testFailed name $ (bimap <$> id <*> id) show (expe ,eids)
+    False -> testFailed name $ (,) (show eids) (show es)
 
+testEdgeDir :: Test
+testEdgeDir = do
+  let name = "grid directed Edges to ids"
+      l    = (40 :: L)
+      d    = (3 :: D)
+      lattice = graphCubicPBC (PBCSquareLattice l d)
+      es = edges lattice
+      eids = M.fromList $ zip es $ map (\e -> fromJust (pbcEdgeIx l d e)) es
+      expe = edgeMap lattice
+  case eids == expe of
+    True -> testPassed name "passed!"
+    False -> testFailed name $ (,) (show eids) (show es)

@@ -36,8 +36,10 @@ module Data.Graph.AdjacencyList.Grid
     , graphCubicPBC
     ) where
 
-import Data.Graph.AdjacencyList
 import Data.List
+import qualified Data.Map.Lazy as M
+
+import Data.Graph.AdjacencyList
 
 type L = Natural
 type D = Natural
@@ -61,24 +63,19 @@ instance Show PBCSquareLattice where
                       " numEdges : " ++ show (gridNumEdges (PBCSquareLattice l d))
 
 undirectedGraphCubicPBC :: PBCSquareLattice -> Graph
-undirectedGraphCubicPBC (PBCSquareLattice l d) = Graph
-    { vertices = gridVertices l d
-    , neighbors = pbcNeighbors l d 
-    , edges = edgesFromNeighbors 
-      $ undirectedGraphCubicPBC (PBCSquareLattice l d)
-    } 
+undirectedGraphCubicPBC (PBCSquareLattice l d) = 
+  let vs = gridVertices l d
+      neis = pbcUndirectedNeighbors l d
+   in createGraph vs neis
 
 -- | Directed graph embeded in cubic lattice
 graphCubicPBC :: PBCSquareLattice -> Graph
 graphCubicPBC (PBCSquareLattice l d) = 
-  let es = foldl' (++) [] 
-             $ map 
-              (pbcForwardEdges l d) 
-              (gridVertices l d)
-   in graphFromEdges es
+  let vs = gridVertices l d
+      neis = pbcDirectedNeighbors l d
+   in createGraph vs neis
 
 gridNumEdges (PBCSquareLattice l d) = d * (gridN l d)
-
 
 gridN :: L -> D -> Natural
 gridN l d = l ^ d
@@ -111,8 +108,12 @@ pbcNeighbor v l d r
     isBoundary v l d = (l'^d') - (l'^(d' - 1)) - mod (v - 1) (l'^d') <= 0
 
 -- | Given vertex returns list of nearest neighboring vertices on a Toroidal Boundary Conditions (pbc) grid
-pbcNeighbors :: L -> D -> Vertex -> [Vertex]
-pbcNeighbors l d v = (\r d'-> pbcNeighbor v l d' r) 
+pbcDirectedNeighbors :: L -> D -> Neighbors
+pbcDirectedNeighbors l d v = fmap (\d'-> pbcNeighbor v l d' Forward) [1 .. d]
+
+-- | Given vertex returns list of nearest neighboring vertices on a Toroidal Boundary Conditions (pbc) grid
+pbcUndirectedNeighbors :: L -> D -> Vertex -> [Vertex]
+pbcUndirectedNeighbors l d v = (\r d'-> pbcNeighbor v l d' r) 
   <$> [Forward,Backward] <*> [1 .. d]
 
 -- | Given a Vertex returns a tuple of the Cartesian product of a L sized Cycle graph
@@ -163,6 +164,17 @@ pbcForwardEdges l d v = fmap (\d -> Edge v (pbcNeighbor v l d Forward)) [1 .. d]
 pbcBackwardEdges :: L -> D -> Vertex -> [Edge]
 pbcBackwardEdges l d v = fmap (\d -> Edge v (pbcNeighbor v l d Backward)) [1 .. d]
 
+pbcUndirectedEdges :: L -> D -> [Edge]
+pbcUndirectedEdges l d = 
+  let nei v = 
+        foldl' 
+          (\ac d -> ac ++
+              [ Edge v (pbcNeighbor v l d Forward)
+              , Edge v (pbcNeighbor v l d Backward)
+              ]
+          )[] [1 .. d]
+   in foldr (\v ac -> (nei v) ++ ac) [] $ gridVertices l d
+
 -- | Returns tuple (edge) giving forward and backward vertices of given vertex on a Toroidal Boundary Conditions (pbc) grid
 pbcAdjacentEdges :: L -> D -> Vertex -> [Edge]
 pbcAdjacentEdges l d v = (\r d -> 
@@ -170,6 +182,10 @@ pbcAdjacentEdges l d v = (\r d ->
             Backward -> Edge (pbcNeighbor v l d r) v
   ) 
   <$> [Forward,Backward] <*> [1 .. d]
+
+-- | List of edges of grid with periodic boundary conditions
+pbcDirectedEdges :: L -> D -> [Edge]
+pbcDirectedEdges l d = (\v j-> Edge v (pbcNeighbor v l j Forward)) <$> gridVertices l d <*> [1 .. d]
 
 -- | Index of edge of a grid with periodic boundary conditions
 -- Very inefficient, better use Data.Map for lookups.

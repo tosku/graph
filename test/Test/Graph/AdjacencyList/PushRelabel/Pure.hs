@@ -26,20 +26,19 @@ fastTests = [
             ]
 
 
-graphTest1 = Graph { vertices = [1..7]
-                   , neighbors = (\v ->let nei 1 = [2,5,6]
-                                           nei 2 = [5,3]
-                                           nei 3 = [4]
-                                           nei 4 = []
-                                           nei 5 = [4,7]
-                                           nei 6 = [7]
-                                           nei 7 = [4]
-                                       in nei v
-                                 )
-                   , edges = edgesFromNeighbors graphTest1
-                   }
+graphTest1 = 
+  let vs = [1..7]
+      neis = (\v -> let nei 1 = [2,5,6]
+                        nei 2 = [5,3]
+                        nei 3 = [4]
+                        nei 4 = []
+                        nei 5 = [4,7]
+                        nei 6 = [7]
+                        nei 7 = [4]
+                     in nei v
+             )
+   in createGraph vs neis
   
-
 fg = Network { graph = graphTest1
              , source = 1
              , sink = 7
