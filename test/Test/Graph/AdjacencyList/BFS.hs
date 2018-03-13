@@ -48,14 +48,14 @@ test2 :: Test
 test2 = do
   let name = "BFS in undirected grid tested against fgl library"
       l    = (6 :: L)
-      d    = (2 :: D)
+      d    = (3 :: D)
       lat  = graphCubicPBC (PBCSquareLattice  l d)
-      latbfs = bfs lat 1
+      latbfs = bfs lat 18
       out = sort $ IM.toList (level latbfs)
       vs = map (\v -> (v,())) $ vertices lat :: [G.UNode]
       es = map (\(f,t) -> (f,t,1)) $ (map toTuple (edges lat)) :: [G.LEdge Double]
       ingr = G.mkGraph vs es :: I.Gr () Double
-      expe = sort $ IBFS.level 1 ingr
+      expe = sort $ IBFS.level 18 ingr
   case expe == out of
     True -> testPassed name $ "passed!"
     False -> testFailed name $ (,) ("\n" ++ show expe) 

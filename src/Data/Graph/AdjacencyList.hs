@@ -30,6 +30,13 @@ module Data.Graph.AdjacencyList
     , reverseEdge
     , reverseEdges
     , reverseGraph
+    -- * Filter Graph's vertices
+    , filterVertices
+    -- * Filter Graph's edges
+    , filterEdges
+    -- * creates reverse edges making a directed
+    -- graph undirected
+    , makeUndirected
     , adjacentEdges
     , edgesFromNeighbors
     , adjacencyMap
@@ -41,6 +48,7 @@ module Data.Graph.AdjacencyList
     ) where
 
 import Data.List
+import Data.List.Unique
 import Data.Maybe
 import Data.Natural
 import qualified Data.Map.Lazy as M
@@ -166,3 +174,32 @@ adjacencyMap g = IM.fromList $ fmap (\v -> (v, (neighbors g v))) vs
 reverseGraph :: Graph -> Graph
 reverseGraph g =
   graphFromEdges $ reverseEdges g
+
+filterVertices :: (Vertex -> Bool) -> Graph -> Graph
+filterVertices f g =
+  let oldvs = vertices g
+      vs = filter f oldvs 
+      neis v = 
+        let ns = neighbors g v
+         in filter f ns
+   in createGraph vs neis
+
+filterEdges :: (Edge -> Bool) -> Graph -> Graph
+filterEdges f g =
+  let vs = vertices g
+      neis v = 
+        let neis = neighbors g v
+         in filter (\n -> f (Edge v n)) neis
+   in createGraph vs neis
+
+makeUndirected :: Graph -> Graph
+makeUndirected g =
+  let rg = reverseGraph g
+      vs = vertices g
+      newnei v = 
+        let nei = neighbors g v
+            rnei = neighbors rg v
+         in sortUniq $ nei ++ rnei
+   in createGraph vs newnei
+
+

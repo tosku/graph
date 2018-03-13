@@ -26,7 +26,7 @@ type Capacity = Rational
 type Capacities = M.Map Edge Capacity 
 type Flow = Capacity
 
-data Network = Network { graph :: Graph
+data Network = Network { graph :: !Graph
                        , source :: Vertex
                        , sink :: Vertex
                        , capacities :: Capacities
