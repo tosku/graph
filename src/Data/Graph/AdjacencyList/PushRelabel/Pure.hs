@@ -1,23 +1,17 @@
 {-|
 Module      : PushRelabel - Pure
-Description : Maximum Flow - Min Cut - Push relabel algorithm - Pure
+Description : Maximum Flow - Push relabel - Loom Algorithm
 Copyright   : Thodoris Papakonstantinou, 2017
 License     : GPL-3
 Maintainer  : mail@tpapak.com
 Stability   : experimental
 Portability : POSIX
-|-}
+
+ -}
 
 {-# LANGUAGE BangPatterns #-}
 
-module Data.Graph.AdjacencyList.PushRelabel.Pure
-  ( ResidualGraph (..)
-  , Network (..)
-  , pushRelabel
-  , netFlow
-  , sourceEdgesCapacity
-  , stCut
-  ) where
+module Data.Graph.AdjacencyList.PushRelabel.Pure where
 
 import Data.List
 import Data.Maybe
@@ -36,7 +30,7 @@ import qualified Data.Graph.AdjacencyList.BFS as BFS
 pushRelabel :: Network -> Either String ResidualGraph
 pushRelabel net =
   let initg = initializeResidualGraph net
-      res = argalios initg 0
+      res = loom initg 0
       nvs = vertices $ graph $ network res
       s = source net
       t = sink net
@@ -66,8 +60,9 @@ pushRelabel net =
                         ++ " overflowings are " ++ show (overflowing res)
                         ++ " nevertices are " ++ show (netVertices res)
 
-argalios :: ResidualGraph -> Int -> ResidualGraph 
-argalios rg steps = 
+-- | The main part of the algorithm. 
+loom :: ResidualGraph -> Int -> ResidualGraph 
+loom rg steps = 
   let g = rg `seq` (graph $ network rg)
       s = source $ network rg
       t = sink $ network rg
@@ -84,10 +79,10 @@ argalios rg steps =
          then 
            if oovfls == novfls
               then rg' {steps = steps'}
-              else argalios rg' steps'
-         else argalios rg' steps'
+              else loom rg' steps'
+         else loom rg' steps'
 
--- | pushes flow though edges with starting vertices which are the ends of source edges 
+-- | Pushes flow through edges with starting vertices which are the ends of source edges 
 -- (U) and ending edges that are the start of sink edges (V)
 prePush :: ResidualGraph -> ResidualGraph 
 prePush rg = 
@@ -108,7 +103,6 @@ prePull rg =
 pushNeighbors :: ResidualGraph -> Vertex -> ResidualGraph
 pushNeighbors g v =
   let neimap = netNeighborsMap g
-      xv = excess g v
       (fns, rns) = fromJust $ IM.lookup v neimap
       feds = map (\n -> fromTuple (v,n)) fns
    in foldl' (\ac e -> 
@@ -122,7 +116,6 @@ pullNeighbors g v =
   let neimap = netNeighborsMap g
       (fns, rns) = fromJust $ IM.lookup v neimap
       reds = map (\n -> fromTuple (n,v)) rns
-      xv = excess g v
    in foldl' (\ac e -> 
                 let mv = pull ac e
                  in case mv of 
@@ -133,11 +126,12 @@ bfsRelabel :: ResidualGraph -> ResidualGraph
 bfsRelabel rg =
   let g = graph $ network rg
       sh = numVertices g
-      (slvs,tlvs) = residualDistances rg
-      rg' = IM.foldrWithKey (\ v l ac -> 
-             let h = sh + l
-              in updateHeight ac v h
-                ) rg slvs 
+      (slvs, tlvs) = residualDistances rg
+      rg' = IM.foldrWithKey 
+              (\ v l ac -> 
+                 let h = sh + l
+                  in updateHeight ac v h
+              ) rg slvs 
    in IM.foldrWithKey (\ v h ac
        -> updateHeight ac v h) 
        rg' tlvs

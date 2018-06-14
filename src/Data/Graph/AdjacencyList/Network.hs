@@ -6,7 +6,7 @@ License     : GPL-3
 Maintainer  : mail@tpapak.com
 Stability   : experimental
 Portability : POSIX
-|-}
+ -}
 
 module Data.Graph.AdjacencyList.Network
   ( Network (..)

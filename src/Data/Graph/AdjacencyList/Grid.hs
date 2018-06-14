@@ -38,6 +38,7 @@ module Data.Graph.AdjacencyList.Grid
 
 import Data.List
 import qualified Data.Map.Lazy as M
+import Data.Natural
 
 import Data.Graph.AdjacencyList
 

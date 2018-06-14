@@ -1,6 +1,6 @@
 {-|
 Module      : Data.AdjacencyList.Graph
-Description : Class definitions
+Description : Class definitions of the Graph
 
 Copyright   : Thodoris Papakonstantinou, 2016
 License     : GPL-3
@@ -8,34 +8,36 @@ Maintainer  : mail@tpapak.com
 Stability   : experimental
 Portability : POSIX
 
-Graph TypeClass definitions
+Basic definitions of a graph as an adjacency list.
+The graph is represented as the function that outputs 
+a list of the adjacent vertices of a given vertex,
+which is the function equivalent of the adjacency list.
  -}
 
 {-# LANGUAGE BangPatterns #-}  
 
 module Data.Graph.AdjacencyList
-    ( Natural
-    , Vertex (..)
+    ( Vertex (..)
     , Edge (..)
     , Neighbors (..)
     , EdgeMap (..)
+    -- * Graph definition
     , Graph (..)
     , fromTuple
     , toTuple
-    -- * Graph constructor
+    -- * createGraph: Graph constructor
     , createGraph
-    -- * Graph constructor from edge list
+    -- * graphfromEdges
     , graphFromEdges
     , edges
     , reverseEdge
     , reverseEdges
     , reverseGraph
-    -- * Filter Graph's vertices
+    -- * filterVertices
     , filterVertices
-    -- * Filter Graph's edges
+    -- * filterEdges
     , filterEdges
-    -- * creates reverse edges making a directed
-    -- graph undirected
+    -- * makeUndirected
     , makeUndirected
     , adjacentEdges
     , edgesFromNeighbors
@@ -50,7 +52,6 @@ module Data.Graph.AdjacencyList
 import Data.List
 import Data.List.Unique
 import Data.Maybe
-import Data.Natural
 import qualified Data.Map.Lazy as M
 import qualified Data.IntMap.Lazy as IM
 import qualified Data.Set as Set
@@ -68,18 +69,21 @@ instance Eq Edge where
 
 type EdgeMap = M.Map Edge Int
 
--- | Takes vertex and outputs neighboring vertices
+-- | Takes vertex and outputs neighboring vertices.
+-- The Neighbors type is the functions from vertices to its neighboring neibors
 type Neighbors = (Vertex -> [Vertex])
 
 -- | Graph definition of directed Graphs 
--- undirected graphs should include reverse edges
-data Graph = Graph { vertices :: [Vertex]
-  -- | The edge map is necessary for appointing edge attributes
-                   , edgeMap :: EdgeMap
-                   , neighbors :: Neighbors
-                   }
+-- undirected graphs should include reverse edges.
+data Graph = 
+  Graph { vertices :: [Vertex] -- ^ The domain of the `neighbors` function. 
+        -- It is usefull for finite graphs.
+        , edgeMap :: EdgeMap -- ^ The edge map is necessary 
+        -- for appointing edge attributes
+        , neighbors :: Neighbors -- ^ The `Adjacency List`
+        }
 
--- | gives the position of the edge to the edges list
+-- | Gives the position of the edge to the edges list
 edgeIndex :: Graph -> Edge -> Maybe Int
 edgeIndex g e = M.lookup e $ edgeMap g
 
@@ -123,7 +127,7 @@ instance Show Graph where
   show g = "vertices: " ++ show (vertices g) ++ "\n" ++
             "edges: " ++ show (edges g) ++ "\n"
 
--- | The canonical graph constructor
+-- | Graph constructor given a neighbors function
 createGraph :: [Vertex] -> Neighbors -> Graph
 createGraph vs neis =
   let emap = edgeMapFromEdges $ edgesFromNeighbors neis vs
@@ -132,6 +136,7 @@ createGraph vs neis =
             , edgeMap = emap
             }
 
+-- | Graph constructor given a list of edges
 graphFromEdges :: [Edge] -> Graph
 graphFromEdges es = 
   let vs = Set.toList $ foldl' (\ac (Edge u v) ->
@@ -175,7 +180,10 @@ reverseGraph :: Graph -> Graph
 reverseGraph g =
   graphFromEdges $ reverseEdges g
 
-filterVertices :: (Vertex -> Bool) -> Graph -> Graph
+-- | Get the subgraph of a graph by including vertices satisfying given predicate.
+filterVertices :: (Vertex -> Bool) -- ^ filter predicate
+               -> Graph
+               -> Graph
 filterVertices f g =
   let oldvs = vertices g
       vs = filter f oldvs 
@@ -184,6 +192,7 @@ filterVertices f g =
          in filter f ns
    in createGraph vs neis
 
+-- | Get the subgraph of a graph by including edges satisfying given predicate.
 filterEdges :: (Edge -> Bool) -> Graph -> Graph
 filterEdges f g =
   let vs = vertices g
@@ -192,7 +201,9 @@ filterEdges f g =
          in filter (\n -> f (Edge v n)) neis
    in createGraph vs neis
 
-makeUndirected :: Graph -> Graph
+-- | Make a graph undirected by adding all missing reverse edges.
+makeUndirected :: Graph -- ^ directed graph
+               -> Graph -- ^ undirected graph
 makeUndirected g =
   let rg = reverseGraph g
       vs = vertices g
@@ -201,5 +212,3 @@ makeUndirected g =
             rnei = neighbors rg v
          in sortUniq $ nei ++ rnei
    in createGraph vs newnei
-
-

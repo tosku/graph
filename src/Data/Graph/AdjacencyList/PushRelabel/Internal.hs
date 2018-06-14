@@ -7,13 +7,12 @@ Maintainer  : mail@tpapak.com
 Stability   : experimental
 Portability : POSIX
 
-|-}
+ -}
 
 {-# LANGUAGE BangPatterns #-}
 
 module Data.Graph.AdjacencyList.PushRelabel.Internal
-  ( 
-    Network (..)
+  ( Network (..)
   , ResidualGraph (..)
   , NeighborsMap
   , ResidualVertex (..)
@@ -82,14 +81,15 @@ type NeighborsMap = IM.IntMap ([Vertex], [Vertex])
 
 type Overflowing = IM.IntMap Set.IntSet
 
-data ResidualGraph = ResidualGraph { network :: !Network
-                                   , netVertices :: !ResidualVertices
-                                   , netEdges :: !ResidualEdges 
-                                   , netNeighborsMap :: !NeighborsMap 
-                                   , overflowing :: !Overflowing
-                                   , steps :: !Int
-                                   }
-                       deriving (Show,Eq)
+data ResidualGraph = 
+  ResidualGraph { network :: !Network
+                , netVertices :: !ResidualVertices
+                , netEdges :: !ResidualEdges 
+                , netNeighborsMap :: !NeighborsMap 
+                , overflowing :: !Overflowing -- ^ Set of overflowing vertices
+                , steps :: !Int
+                }
+   deriving (Show,Eq)
 
 initializeResidualGraph :: Network -> ResidualGraph
 initializeResidualGraph net = 
@@ -104,8 +104,10 @@ initializeResidualGraph net =
                       let ovfs = getOverflowing vs
                           bfs = BFS.bfs (graph net) (source net)
                           maxLevel = BFS.maxLevel bfs
-                          fl v =  let (ResidualVertex _ l _ _) = fromJust $ IM.lookup v vs
-                                   in l
+                          fl v = 
+                            let (ResidualVertex _ l _ _) = 
+                                  fromJust $ IM.lookup v vs
+                             in l
                        in Set.foldl' 
                             (\ac v -> 
                                IM.adjust (\ps -> Set.insert v ps) (fl v) ac
@@ -121,8 +123,12 @@ getNetNeighborsMap g =
         (\ac v -> IM.insert v (neis v) ac) 
         IM.empty (vertices g)
 
-netNeighbors :: NeighborsMap -> Vertex -> ([Vertex],[Vertex]) -- ^ graph and reverse (inward and outward) neighbors
-netNeighbors nm v = fromJust $ IM.lookup v nm
+-- | graph and reverse (inward and outward) neighbors
+netNeighbors :: NeighborsMap 
+             -> Vertex 
+             -> ([Vertex], [Vertex]) 
+netNeighbors nm v = 
+  fromJust $ IM.lookup v nm
 
 sourceEdges :: Network -> [(Edge,Capacity)]
 sourceEdges net = 
@@ -195,18 +201,18 @@ push g e =
          else Nothing 
 
 pull :: ResidualGraph -> Edge -> Maybe ResidualGraph
-pull g e = 
-  let u = from e
-      v = to e
-      hu = height g u
-      hv = height g v 
-      xu = excess g u 
-      xv = excess g v
-      c = edgeCapacity g e
-      f = edgeFlow g e
+pull g e  = 
+  let u   = from e
+      v   = to e
+      hu  = height g u
+      hv  = height g v 
+      xu  = excess g u 
+      xv  = excess g v
+      c   = edgeCapacity g e
+      f   = edgeFlow g e
       nvs = netVertices g
-      xf = min xv f
-   in if (hv == hu + 1)  && xf > 0 
+      xf  = min xv f
+   in if (hv == hu + 1) && xf > 0 
          then
            let g' = foldr (\f ac -> f ac) g
                      [ (\nt -> updateEdge nt e (f - xf))
@@ -319,8 +325,8 @@ outflow g v =
       reds = map (\n -> fromTuple (v,n)) $ fst ns
    in foldl' (\ac e -> (ac + edgeFlow g e)) 0 reds 
 
--- | (distance from sink , distance from source (only those that don't connect
--- | to sink))
+-- | (distance from source (only those that don't connect
+-- to sink), distance from sink)
 residualDistances :: ResidualGraph -> (IM.IntMap Int, IM.IntMap Int)
 residualDistances rg = 
   let es = map snd (IM.toList $ netEdges rg)
@@ -360,13 +366,13 @@ residualDistances rg =
              ) sfsatnbs tbes
       tlvs = BFS.level $ BFS.adjBFS tsatnbs t
       slvs = BFS.level $ BFS.adjBFS ssatnbs s
-    in (slvs,tlvs)
+    in (slvs, tlvs)
   where
     g = graph $ network rg
     s = source $ network rg
     t = sink $ network rg
 
--- | gives st partition 
+-- | source - sink partition 
 stCut :: ResidualGraph -> ([Vertex],[Vertex])
 stCut rg = 
   let !resdis = residualDistances rg

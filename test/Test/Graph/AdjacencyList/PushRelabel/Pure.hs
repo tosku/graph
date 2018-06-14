@@ -18,6 +18,7 @@ import TestHS
 import Data.Graph.AdjacencyList
 import Data.Graph.AdjacencyList.Grid
 import Data.Graph.AdjacencyList.Network
+import Data.Graph.AdjacencyList.PushRelabel.Internal
 import Data.Graph.AdjacencyList.PushRelabel.Pure
 
 fastTests :: [Test]
