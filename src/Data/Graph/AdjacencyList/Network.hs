@@ -26,12 +26,22 @@ type Capacity = Rational
 type Capacities = M.Map Edge Capacity 
 type Flow = Capacity
 
+showCapacities :: Capacities -> String
+showCapacities cps =
+  show $ fmap (\c -> fromRational c :: Double) cps
+
 data Network = Network { graph :: !Graph
                        , source :: Vertex
                        , sink :: Vertex
                        , capacities :: Capacities
                        , flow :: Capacities
                        }
-                       deriving (Show,Eq)
+                       deriving (Eq)
 
-
+instance Show Network where
+  show net =
+    "Network" <> show (edges (graph net)) <> "\n"
+    <> " source: " <> show (source net) <> "\n"
+    <> " sink  : " <> show (sink net) <> "\n"
+    <> " capacities: " <> showCapacities (capacities net) <> "\n"
+    <> " flows: " <> showCapacities (flow net) <> "\n"
