@@ -44,37 +44,38 @@ initialBFS s = BFS { frontier = Set.singleton s
 
 -- | BFS for implicit neighbor definition (grids, infinite graphs)
 bfs :: Graph -> Vertex -> BFS
-bfs g s = breadthFirstSearch sbfs
-  where sbfs = initialBFS s
-        breadthFirstSearch b
-          | Set.empty == frontier b = b
-          | otherwise = bbfs
-            where oldLevel = maxLevel b
-                  newLevel = oldLevel + 1
-                  oldLevels = level b
-                  oldFrontiers = frontier b
-                  frontPar = 
+bfs g s = 
+  let sbfs = initialBFS s
+      breadthFirstSearch b =
+        if Set.empty == frontier b || not (elem s (vertices g))
+           then b
+           else
+             let oldLevel = maxLevel b
+                 newLevel = oldLevel + 1
+                 oldLevels = level b
+                 oldFrontiers = frontier b
+                 frontPar = 
                     let toCheck = 
                           Set.foldr 
                             (\v ac-> ac ++ (zip (neighbors g v) (repeat v))) 
                             [] oldFrontiers
                      in filter (\(n,p) -> not $ IM.member n oldLevels) toCheck
-                  newFrontiers = Set.fromList $ map fst frontPar
-                  oldParents = parent b
-                  newParents = 
-                   foldl' 
-                     (\ac (n,p) -> IM.insert n p ac) 
-                     oldParents frontPar
-                  newLevels = 
-                    Set.foldl' 
-                      (\ac v -> IM.insert v newLevel ac) 
-                      oldLevels newFrontiers
-                  bbfs = breadthFirstSearch (b { frontier = newFrontiers
-                             , level = newLevels 
-                             , parent = newParents
-                             , maxLevel = newLevel
-                             , topSort = (topSort b) ++ Set.toList oldFrontiers
-                             })
+                 newFrontiers = Set.fromList $ map fst frontPar
+                 oldParents = parent b
+                 newParents = foldl' 
+                            (\ac (n,p) -> IM.insert n p ac) 
+                            oldParents frontPar
+                 newLevels = Set.foldl' 
+                           (\ac v -> IM.insert v newLevel ac) 
+                           oldLevels newFrontiers
+                 bbfs = breadthFirstSearch (b { frontier = newFrontiers
+                            , level = newLevels 
+                            , parent = newParents
+                            , maxLevel = newLevel
+                            , topSort = (topSort b) ++ Set.toList oldFrontiers
+                            })
+               in bbfs
+   in breadthFirstSearch sbfs
 
 -- | BFS for graph with provided vertex adjacencyList
 adjBFS :: IM.IntMap [Vertex] -> Vertex -> BFS
