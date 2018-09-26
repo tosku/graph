@@ -5,7 +5,7 @@
 -- hash: 8bb63f27a1239b658115019c596c9ea157fc0d7c499ee7ca62ecb24c2058a406
 
 name:           graph
-version:        0.2.0.0
+version:        0.2.0.1
 description:    Graph library
 homepage:       https://github.com/tosku/graph#readme
 bug-reports:    https://github.com/tosku/graph/issues
