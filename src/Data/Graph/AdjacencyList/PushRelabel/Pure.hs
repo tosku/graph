@@ -100,6 +100,7 @@ prePull rg =
          ac lset
                ) rg ovfs
 
+-- | Push through all (forward) residual neighbors
 pushNeighbors :: ResidualGraph -> Vertex -> ResidualGraph
 pushNeighbors g v =
   let neimap = netNeighborsMap g
@@ -111,6 +112,7 @@ pushNeighbors g v =
                     Nothing -> ac
                     Just g'' -> g'') g feds
 
+-- | Push through all (backward) meaning pull all residual neighbors
 pullNeighbors :: ResidualGraph -> Vertex -> ResidualGraph
 pullNeighbors g v =
   let neimap = netNeighborsMap g
@@ -122,6 +124,7 @@ pullNeighbors g v =
                       Nothing -> ac
                       Just g'' -> g'') g reds
 
+-- | Global relabel according to bfs from source and sink
 bfsRelabel :: ResidualGraph -> ResidualGraph
 bfsRelabel rg =
   let g = graph $ network rg
@@ -129,9 +132,11 @@ bfsRelabel rg =
       (slvs, tlvs) = residualDistances rg
       rg' = IM.foldrWithKey 
               (\ v l ac -> 
-                 let h = sh + l
+                 -- Heights for the source partition vertices is N \+ their distance to the source
+                let h = sh + l 
                   in updateHeight ac v h
               ) rg slvs 
    in IM.foldrWithKey (\ v h ac
+       -- Heights for the sink partition vertices equals the distance from sink
        -> updateHeight ac v h) 
        rg' tlvs
