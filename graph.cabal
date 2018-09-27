@@ -5,7 +5,7 @@
 -- hash: 8bb63f27a1239b658115019c596c9ea157fc0d7c499ee7ca62ecb24c2058a406
 
 name:           graph
-version:        0.2.1.1
+version:        0.2.2.0
 description:    Graph library
 homepage:       https://github.com/tosku/graph#readme
 bug-reports:    https://github.com/tosku/graph/issues
@@ -31,6 +31,7 @@ library
                      , Data.Graph.AdjacencyList.Grid
                      , Data.Graph.AdjacencyList.Network
                      , Data.Graph.AdjacencyList.BFS
+                     , Data.Graph.AdjacencyList.DFS
                      , Data.Graph.AdjacencyList.PushRelabel.Internal
                      , Data.Graph.AdjacencyList.PushRelabel.Pure
   build-depends:       base >= 4.7 && < 5
@@ -51,6 +52,7 @@ test-suite graph-test
   other-modules:  Test.Graph.AdjacencyList
                 , Test.Graph.AdjacencyList.Grid
                 , Test.Graph.AdjacencyList.BFS
+                , Test.Graph.AdjacencyList.DFS
                 , Test.Graph.AdjacencyList.PushRelabel.Pure
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:

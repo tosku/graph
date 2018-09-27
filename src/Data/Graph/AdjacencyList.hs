@@ -70,7 +70,7 @@ instance Eq Edge where
 type EdgeMap = M.Map Edge Int
 
 -- | Takes vertex and outputs neighboring vertices.
--- The Neighbors type is the functions from vertices to its neighboring neibors
+-- The Neighbors type is the function from a vertex to its neighbors
 type Neighbors = (Vertex -> [Vertex])
 
 -- | Graph definition of directed Graphs 
