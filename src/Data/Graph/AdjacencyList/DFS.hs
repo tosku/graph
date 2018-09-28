@@ -17,6 +17,7 @@ Portability : POSIX
 module Data.Graph.AdjacencyList.DFS
   ( DFS (..)
   , dfs
+  , topsort
   ) where
 
 import Data.List
@@ -29,32 +30,50 @@ import Data.Graph.AdjacencyList
 
 data DFS = DFS { postordering :: Seq.Seq Vertex
                , discovered   :: Set.IntSet
+               , called :: Int
                } deriving (Eq, Show)
 
-initialBFS :: Vertex -> DFS
-initialBFS s = DFS { postordering = Seq.empty
-                   , discovered   = Set.insert s Set.empty
-                   }
+initialDFS :: DFS
+initialDFS = DFS { postordering = Seq.empty
+                 , discovered   = Set.empty
+                 , called = 0
+                 }
+
+topsort :: DFS -> [Vertex]
+topsort d =
+  foldl (\ac v-> v:ac ) [] $ Seq.viewr $ postordering d
+
+joinDFS :: DFS -> DFS -> DFS
+joinDFS a b =
+  let !psta = postordering a
+      !pstb = postordering b
+      !disa = discovered a
+      !disb = discovered b
+      !iter = called b
+   in DFS { postordering = pstb
+          , discovered = Set.union disa disb
+          , called = iter + 1
+          }
 
 -- | Depth first search
 dfs :: Graph -> Vertex -> DFS
 dfs g s = 
-  let sbfs = initialBFS s
-      depthFirstSearch :: Vertex -> DFS -> DFS
-      depthFirstSearch v ac =
-        let ns = neighbors g v
-            disc = discovered ac
-         in if null ns
-              then ac
-              else
-                let mnextvertex = 
-                      let mns = [ u | u <- ns, not (Set.member u (disc))]
-                       in if not (null mns)
-                             then Just $ head mns
-                             else Nothing
-                 in case mnextvertex of
-                      Nothing -> ac
-                      Just nextvertex -> 
-                        let ac' = ac { discovered = Set.insert nextvertex disc }
-                         in depthFirstSearch nextvertex ac'
-   in depthFirstSearch s sbfs
+  if not $ elem s (vertices g) 
+     then initialDFS
+     else
+       let sbfs = initialDFS
+           depthFirstSearch :: [Vertex] -> DFS -> DFS
+           depthFirstSearch [] ac = ac
+           depthFirstSearch (v:stack) ac =
+              let ns = neighbors g v
+                  disc = discovered ac
+                  postord = postordering ac
+                  newpostord = if Set.member v disc
+                                  then postord
+                                  else ((Seq.<|) v postord)
+                  newstack = [ u | u <- ns, not (Set.member u (disc))] ++ stack
+                  ac' = ac { discovered = Set.insert v disc 
+                           , postordering = newpostord
+                           }
+               in joinDFS ac (depthFirstSearch newstack ac') 
+        in depthFirstSearch [s] sbfs
