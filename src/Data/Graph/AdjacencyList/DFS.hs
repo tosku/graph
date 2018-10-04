@@ -41,10 +41,10 @@ initialDFS = DFS { postordering = Seq.empty
 
 topsort :: DFS -> [Vertex]
 topsort d =
-  foldl (\ac v-> v:ac ) [] $ Seq.viewr $ postordering d
+  foldl' (\ac v-> v:ac ) [] $ Seq.viewr $ postordering d
 
-joinDFS :: DFS -> DFS -> DFS
-joinDFS a b =
+unionDFS :: DFS -> DFS -> DFS
+unionDFS a b =
   let !psta = postordering a
       !pstb = postordering b
       !disa = discovered a
@@ -75,5 +75,5 @@ dfs g s =
                   ac' = ac { discovered = Set.insert v disc 
                            , postordering = newpostord
                            }
-               in joinDFS ac (depthFirstSearch newstack ac') 
+               in unionDFS ac (depthFirstSearch newstack ac') 
         in depthFirstSearch [s] sbfs
