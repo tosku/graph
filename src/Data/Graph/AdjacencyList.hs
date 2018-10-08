@@ -42,6 +42,7 @@ module Data.Graph.AdjacencyList
     , adjacentEdges
     , edgesFromNeighbors
     , adjacencyMap
+    , edgeExists
     , edgeIndex
     , from
     , to
@@ -82,6 +83,9 @@ data Graph =
         -- for appointing edge attributes
         , neighbors :: Neighbors -- ^ The `Adjacency List`
         }
+
+edgeExists :: Graph -> Edge -> Bool
+edgeExists g e = M.member e (edgeMap g)
 
 -- | Gives the position of the edge to the edges list
 edgeIndex :: Graph -> Edge -> Maybe Int

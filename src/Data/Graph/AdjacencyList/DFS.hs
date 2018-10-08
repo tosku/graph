@@ -18,6 +18,7 @@ module Data.Graph.AdjacencyList.DFS
   ( DFS (..)
   , dfs
   , topsort
+  , longestPath
   ) where
 
 import Data.List
@@ -28,32 +29,16 @@ import qualified Data.Sequence as Seq
 
 import Data.Graph.AdjacencyList
 
-data DFS = DFS { postordering :: Seq.Seq Vertex
+data DFS = DFS { postordering :: [Vertex]
                , discovered   :: Set.IntSet
                , called :: Int
                } deriving (Eq, Show)
 
 initialDFS :: DFS
-initialDFS = DFS { postordering = Seq.empty
+initialDFS = DFS { postordering = []
                  , discovered   = Set.empty
                  , called = 0
                  }
-
-topsort :: DFS -> [Vertex]
-topsort d =
-  foldl' (\ac v-> v:ac ) [] $ Seq.viewr $ postordering d
-
-unionDFS :: DFS -> DFS -> DFS
-unionDFS a b =
-  let !psta = postordering a
-      !pstb = postordering b
-      !disa = discovered a
-      !disb = discovered b
-      !iter = called b
-   in DFS { postordering = pstb
-          , discovered = Set.union disa disb
-          , called = iter + 1
-          }
 
 -- | Depth first search
 dfs :: Graph -> Vertex -> DFS
@@ -68,12 +53,36 @@ dfs g s =
               let ns = neighbors g v
                   disc = discovered ac
                   postord = postordering ac
-                  newpostord = if Set.member v disc
-                                  then postord
-                                  else ((Seq.<|) v postord)
+                  newpostord = foldl' (\ac v' -> 
+                                if elem v' ac
+                                  then v': (filter (\x -> x /= v') ac)
+                                  else v':ac
+                                      ) postord (v:ns)
                   newstack = [ u | u <- ns, not (Set.member u (disc))] ++ stack
                   ac' = ac { discovered = Set.insert v disc 
                            , postordering = newpostord
+                           , called = called ac + 1
                            }
-               in unionDFS ac (depthFirstSearch newstack ac') 
+               in depthFirstSearch newstack ac' 
         in depthFirstSearch [s] sbfs
+
+-- Topological sorting is the reverse of postordering in DAGs
+topsort :: DFS -> [Vertex]
+topsort = reverse . postordering
+
+-- Longest path from source
+longestPath :: Graph -> Vertex -> [Edge]
+longestPath g s =
+  let latests = postordering $ dfs g s
+      lp :: [Vertex] -> [Edge] -> [Edge]
+      lp [] ac        = ac
+      lp (v:parents) ac = 
+         if null parents
+           then ac
+           else 
+            let (par:rests) = parents
+                edgePath = Edge par v
+             in if edgeExists g edgePath
+                  then lp parents $ edgePath:ac
+                  else lp (v:rests) ac
+   in lp latests []
