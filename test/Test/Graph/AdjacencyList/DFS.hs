@@ -52,7 +52,7 @@ testdfs1 = do
 testlongest1 :: Test
 testlongest1 = do
   let name = "Test DFS on TestGraph1"
-      out = map toTuple $ longestPath graphTest1 1
+      out = map toTuple $ longestPath graphTest1 1 7
       expe = [(1,2),(2,3),(3,6),(6,8),(8,7)]
    in case  out == expe of
         True -> testPassed name $ "passed!" <> (show out)

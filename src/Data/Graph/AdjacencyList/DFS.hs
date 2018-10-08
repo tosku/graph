@@ -70,10 +70,10 @@ dfs g s =
 topsort :: DFS -> [Vertex]
 topsort = reverse . postordering
 
--- Longest path from source
-longestPath :: Graph -> Vertex -> [Edge]
-longestPath g s =
-  let latests = postordering $ dfs g s
+-- Longest path from source from to
+longestPath :: Graph -> Vertex -> Vertex -> [Edge]
+longestPath g s t =
+  let (larger, latests) = break ((==) t) $ postordering $ dfs g s
       lp :: [Vertex] -> [Edge] -> [Edge]
       lp [] ac        = ac
       lp (v:parents) ac = 
