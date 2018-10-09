@@ -21,9 +21,12 @@ import Data.Graph.AdjacencyList.Grid
 fastTests :: [Test]
 fastTests = [ testdfs1
             , testlongest1
+            , testlongest2
+            , testlongest3
+            , testlongest4
             , testdfs2
+            , outofrange
             ]
-
 
 -- | DAG
 graphTest1 = 
@@ -31,10 +34,10 @@ graphTest1 =
       neis = (\v -> let nei 1 = [2,5,6]
                         nei 2 = [3,5]
                         nei 3 = [4,6]
-                        nei 4 = []
+                        nei 4 = [7]
                         nei 5 = [4,7]
                         nei 6 = [8,7]
-                        nei 7 = [4]
+                        nei 7 = []
                         nei 8 = [7]
                      in nei v
              )
@@ -42,19 +45,11 @@ graphTest1 =
 
 testdfs1 :: Test
 testdfs1 = do
-  let name = "Test DFS on TestGraph1"
-      out = dfs graphTest1 1
-      expe = [1,2,3,5,4,6,8,7]
+  let name = "Test DFS topsort on a graph with hamiltonian path"
+      testgraph = graphFromEdges $ (edges graphTest1) ++ [(Edge 3 5),(Edge 5 6),(Edge 8 4)]
+      out = dfs testgraph 1
+      expe = [1,2,3,5,6,8,4,7]
    in case  topsort out == expe of
-        True -> testPassed name $ "passed!" <> (show out)
-        False -> testFailed name $ (,) (show expe) (show out)
-
-testlongest1 :: Test
-testlongest1 = do
-  let name = "Test DFS on TestGraph1"
-      out = map toTuple $ longestPath graphTest1 1 7
-      expe = [(1,2),(2,3),(3,6),(6,8),(8,7)]
-   in case  out == expe of
         True -> testPassed name $ "passed!" <> (show out)
         False -> testFailed name $ (,) (show expe) (show out)
 
@@ -78,15 +73,57 @@ testdfs2 = do
         True -> testPassed name $ "passed!" <> (show out)
         False -> testFailed name $ (,) (show expe) (show $ topsort out)
 
---test2 :: Test
---test2 = do
-  --let name = "DFS in undirected grid 4^2"
-      --l    = (4 :: L)
-      --d    = (2 :: D)
-      --lat  = graphCubicPBC (PBCSquareLattice  l d)
-      --latdfs = dfs lat 7
-      --out = postordering latdfs
-      --expe = out
-   --in case expe == out of
-        --True -> testPassed name $ "passed!" <> show latdfs
-        --False -> testFailed name $ (,) (show expe) (show out)
+testlongest1 :: Test
+testlongest1 = do
+  let name = "Test longest path 1 7 on TestGraph1"
+      out = map toTuple $ longestPath graphTest1 1 7
+      outdfs = dfs graphTest1 1
+      expe = [(1,2),(2,3),(3,6),(6,8),(8,7)]
+   in case  out == expe of
+        True -> testPassed name $ "passed!" <> (show out)
+        False -> testFailed name $ (,) (show expe) (show out <> show outdfs)
+
+testlongest2 :: Test
+testlongest2 = do
+  let name = "Test longest path 1 8 on TestGraph1"
+      out = map toTuple $ longestPath graphTest1 1 8
+      tdfs = dfs graphTest1 1
+      expe = [(1,2),(2,3),(3,6),(6,8)]
+   in case  out == expe of
+        True -> testPassed name $ "passed!" <> (show out)
+        False -> testFailed name $ (,) (show expe) (show out <> show tdfs)
+
+testlongest3 :: Test
+testlongest3 = do
+  let name = "Test longest path 2 8 on TestGraph2"
+      out = map toTuple $ longestPath graphTest1 2 8
+      expe = [(2,3),(3,6),(6,8)]
+   in case  out == expe of
+        True -> testPassed name $ "passed!" <> (show out)
+        False -> testFailed name $ (,) (show expe) (show out)
+
+graphTest3 = 
+  let edges = 
+        map fromTuple 
+        [(1,3),(2,1),(2,3),(2,4),(2,5),(2,6),(4,1),(4,3),(4,5),(5,1),(5,3),(6,1),(6,3),(6,4)]
+   in graphFromEdges edges
+
+testlongest4 :: Test
+testlongest4 = do
+  let name = "topsort 2 3 on TestGraph3"
+      tdfs = dfs graphTest3 2
+      out = postordering tdfs 
+      expe = [3,1,5,4,6,2]
+      tgr = map (neighbors graphTest3) [1..6]
+   in case  out == expe of
+        True -> testPassed name $ "passed!"
+        False -> testFailed name $ (,) (show expe) (show tdfs <> show tgr)
+
+outofrange :: Test
+outofrange = do
+  let name = "longest from 3 to 2 on TestGraph3"
+      tdfs = dfs graphTest3 3
+      out  = longestPath graphTest3 3 2
+   in case null out of
+        True  -> testPassed name $ "passed!"
+        False -> testFailed name $ (,) ("[]") (show out)
