@@ -26,6 +26,7 @@ fastTests = [ testdfs1
             , testlongest4
             , testdfs2
             , outofrange
+            , getdirect
             ]
 
 -- | DAG
@@ -127,3 +128,14 @@ outofrange = do
    in case null out of
         True  -> testPassed name $ "passed!"
         False -> testFailed name $ (,) ("[]") (show out)
+
+getdirect :: Test
+getdirect = do
+  let name = "longest of direct"
+      gr = graphFromEdges $ map fromTuple [(4,5),(1,5)]
+      tdfs = dfs gr 1
+      out  = longestPath gr 1 5
+      expe = map fromTuple [(1,5)]
+   in case out == expe of
+        True  -> testPassed name $ "passed!"
+        False -> testFailed name $ (,) ("[(1,5)]") (show out)

@@ -20,6 +20,8 @@ module Data.Graph.AdjacencyList.DFS
   -- * get longest path from a vertex to another
   , longestPath
   , postordering
+  , areConnected
+  , distances
   ) where
 
 import Data.List
@@ -56,7 +58,7 @@ dfs g s =
                   !ac' = foldl' (\ac'' n -> if not (Set.member n (discovered ac''))
                                               then depthFirstSearch n ac''
                                               else ac''
-                               ) ac ns
+                                ) ac ns
                   newpostord = v: (topsort ac')
                   res = ac' { discovered = Set.insert v (discovered ac')
                             , topsort = newpostord
@@ -76,6 +78,7 @@ type DAG = Graph
 distances :: DAG  -> Vertex -> IM.IntMap Vertex
 distances g s =
   let topsorted = topsort $ dfs g s
+      initdists = foldl' (\ac v -> IM.insert v 0 ac) IM.empty $ vertices g
    in foldl' (\ac v -> 
         let neis = neighbors g v
             distv = case IM.lookup v ac of
@@ -88,13 +91,19 @@ distances g s =
                newdist = max neidist (distv+1)
             in IM.insert nei newdist dists'
                   ) ac neis
-      ) (IM.insert s 0 IM.empty) topsorted
+      ) initdists topsorted
 
 -- |checks if s is predecessor of t
 dependsOn :: DAG -> Vertex -> Vertex -> Bool
 dependsOn g t s =
   let topsorted = topsort $ dfs g s
    in elem t (snd (span ((==) s) topsorted))
+
+areConnected :: Graph -> Vertex -> Vertex -> Bool
+areConnected g u v = 
+  let dists = distances g u
+   in (fromJust $ IM.lookup v dists) > 0 || v == u
+
          
 
 -- |Longest path from tail to nose
@@ -103,27 +112,33 @@ longestPath g s t =
   if not $ dependsOn g t s
      then []
      else 
-        let topsorted = topsort $ dfs g s
+        let !topsorted = topsort $ dfs g s
             !dists = distances g s
-            revg = reverseGraph g
-            path' :: Vertex -> [Edge] -> [Edge]
-            path' v p 
-              | v == s = p
-              | otherwise = 
-                let parents = neighbors revg v
-                 in if parents == [s]
-                        then (Edge s v):p
-                        else 
-                          let pred :: Vertex
-                              pred = fst $ foldl'
-                                (\(prevmax,maxdist) parent ->
-                                  let currentDist =
-                                        case IM.lookup parent dists of
-                                          Nothing -> (0,0)
-                                          Just d -> (parent,d)
-                                   in if maxdist < snd currentDist
-                                         then currentDist
-                                         else (prevmax,maxdist)
-                                         ) (0,0) parents
-                           in  path' pred $ (Edge pred v): p
-         in path' t []
+            !revg = reverseGraph g
+            disconnected = filter (\n -> not (areConnected g s n)) $ vertices g
+         in if not $ null disconnected
+              then
+                let cleangraph = filterVertices (\v -> not $ elem v disconnected) g
+                 in longestPath cleangraph s t
+              else
+                let path' :: Vertex -> [Edge] -> [Edge]
+                    path' v p 
+                      | v == s = p
+                      | otherwise = 
+                             let parents = neighbors revg v
+                              in if parents == [s]
+                                   then (Edge s v):p
+                                   else 
+                                     let pred :: Vertex
+                                         pred = fst $ foldl'
+                                           (\(prevmax,maxdist) parent ->
+                                             let currentDist =
+                                                   case IM.lookup parent dists of
+                                                     Nothing -> (0,0)
+                                                     Just d -> (parent,d)
+                                              in if maxdist < snd currentDist
+                                                    then currentDist
+                                                    else (prevmax,maxdist)
+                                                    ) (0,0) parents
+                                      in  path' pred $ (Edge pred v): p
+                 in path' t []

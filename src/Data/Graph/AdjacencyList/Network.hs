@@ -40,7 +40,7 @@ data Network = Network { graph :: !Graph
 
 instance Show Network where
   show net =
-    "Network" <> show (edges (graph net)) <> "\n"
+    "Network" <> show (graph net) <> "\n"
     <> " source: " <> show (source net) <> "\n"
     <> " sink  : " <> show (sink net) <> "\n"
     <> " capacities: " <> showCapacities (capacities net) <> "\n"
