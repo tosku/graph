@@ -48,6 +48,7 @@ module Data.Graph.AdjacencyList
     , to
     , numVertices
     , numEdges
+    , completeGraph
     ) where
 
 import Data.List
@@ -216,3 +217,11 @@ makeUndirected g =
             rnei = neighbors rg v
          in sortUniq $ nei ++ rnei
    in createGraph vs newnei
+
+-- | Complete undirected graph from number of vertices
+completeGraph :: Int -> Graph
+completeGraph n =
+  let es = [e | e <- Edge <$> [1..n] <*> [1..n], (\(Edge s t) -> s /= t ) e]
+   in graphFromEdges es
+
+

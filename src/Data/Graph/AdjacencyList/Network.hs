@@ -13,6 +13,7 @@ module Data.Graph.AdjacencyList.Network
   , Capacity
   , Capacities
   , Flow
+  , uniformCapacities
   ) where
 
 import Data.List
@@ -45,3 +46,8 @@ instance Show Network where
     <> " sink  : " <> show (sink net) <> "\n"
     <> " capacities: " <> showCapacities (capacities net) <> "\n"
     <> " flows: " <> showCapacities (flow net) <> "\n"
+
+-- | Set all capacities to 1
+uniformCapacities :: Graph -> Capacities
+uniformCapacities g =
+  M.fromList $ map (\e -> (e,1)) $ edges g

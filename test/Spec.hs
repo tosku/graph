@@ -3,6 +3,7 @@ import Test.Graph.AdjacencyList as A
 import Test.Graph.AdjacencyList.Grid as G
 import Test.Graph.AdjacencyList.BFS as BFS
 import Test.Graph.AdjacencyList.DFS as DFS
+import Test.Graph.AdjacencyList.WFI as WFI
 import Test.Graph.AdjacencyList.PushRelabel.Pure as PRP
 
 main :: IO ()
@@ -13,5 +14,6 @@ main = do
     A.fastTests 
     ++ G.fastTests 
     ++ BFS.fastTests 
-    ++ DFS.fastTests 
-    ++ PRP.fastTests 
+    ++ DFS.fastTests
+    ++ PRP.fastTests
+    ++ WFI.fastTests

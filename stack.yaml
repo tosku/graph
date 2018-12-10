@@ -7,4 +7,4 @@ extra-deps:
   commit: fead8353b72918241d306f57126bbb5fde4eeb5a
 - Unique-0.4.7.5
 allow-newer: true
-resolver: lts-12.10
+resolver: lts-12.18

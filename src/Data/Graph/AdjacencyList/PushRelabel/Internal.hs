@@ -33,6 +33,7 @@ module Data.Graph.AdjacencyList.PushRelabel.Internal
   , getOverflowing
   , inflow
   , outflow
+  , networkFromResidual
   , updateHeight
   , updateExcess
   , updateEdge
@@ -324,6 +325,14 @@ outflow g v =
   let ns  = netNeighbors (netNeighborsMap g) v 
       reds = map (\n -> fromTuple (v,n)) $ fst ns
    in foldl' (\ac e -> (ac + edgeFlow g e)) 0 reds 
+
+-- | Update flow of network from the residual edges' preflow
+networkFromResidual :: ResidualGraph -> Network
+networkFromResidual resg =
+  let net = network resg
+      es = edges $ graph $ net
+      flow' = M.fromList $ map (\e -> (e, edgeFlow resg e) ) es
+   in net {flow = flow'}
 
 -- | Partitions residual graph into source sink cut and stores the distance from
 -- source and sink respectively:

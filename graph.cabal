@@ -32,6 +32,7 @@ library
                      , Data.Graph.AdjacencyList.Network
                      , Data.Graph.AdjacencyList.BFS
                      , Data.Graph.AdjacencyList.DFS
+                     , Data.Graph.AdjacencyList.WFI
                      , Data.Graph.AdjacencyList.PushRelabel.Internal
                      , Data.Graph.AdjacencyList.PushRelabel.Pure
   build-depends:       base >= 4.7 && < 5
@@ -42,6 +43,7 @@ library
                      , Unique
                      , either-unwrap >= 1.1
                      , async >= 2.1.1
+                     , array
   default-language: Haskell2010
 
 test-suite graph-test
@@ -53,6 +55,7 @@ test-suite graph-test
                 , Test.Graph.AdjacencyList.Grid
                 , Test.Graph.AdjacencyList.BFS
                 , Test.Graph.AdjacencyList.DFS
+                , Test.Graph.AdjacencyList.WFI
                 , Test.Graph.AdjacencyList.PushRelabel.Pure
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:

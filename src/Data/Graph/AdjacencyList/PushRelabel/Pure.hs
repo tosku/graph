@@ -107,7 +107,8 @@ loom rg steps =
    in if nfl == olf 
          then 
            if oovfls == novfls
-              then rg' {steps = steps'}
+              then rg' { network = networkFromResidual rg'
+                       , steps = steps'}
               else loom rg' steps'
          else loom rg' steps'
 
