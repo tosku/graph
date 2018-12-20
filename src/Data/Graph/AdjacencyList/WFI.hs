@@ -17,6 +17,7 @@ Portability : POSIX
 
 module Data.Graph.AdjacencyList.WFI
   ( Distances (..)
+  , Weight
   , shortestDistances
   , unweightedShortestDistances
   , adjacencyArray
@@ -32,12 +33,18 @@ import Data.Graph.AdjacencyList
 -- | In an unweighted graph the weight is 1 for each edge
 type Weight = Rational
 
+type IMArray = IM.IntMap (IM.IntMap Weight)
 -- | The array containing the distances from vertex to vertex
-type Distances = IM.IntMap (IM.IntMap Weight)
+newtype Distances = Distances IMArray
+  deriving (Eq, Ord, Read)
 
+instance Show Distances where
+  show (Distances d) =
+    let vs = IM.keys d
+     in show d
 
 -- | Reads distance array. Nothing corresponds to infinite distance
-shortestDistance :: Distances -> Vertex -> Vertex -> Maybe Weight
+shortestDistance :: IMArray -> Vertex -> Vertex -> Maybe Weight
 shortestDistance dists u v = do
   vmap <- IM.lookup u dists
   IM.lookup v vmap
@@ -51,11 +58,11 @@ adjacencyArray g =
                       Just vmap' -> vmap'
          in IM.insert u ((IM.insert v 1) vmap) dists
                 ) IM.empty es
-   in IM.mapWithKey (\i m -> IM.insert i 0 m) dists 
+   in Distances $ IM.mapWithKey (\i m -> IM.insert i 0 m) dists 
 
 -- | Get all shortest distances given initial weights on edges
 shortestDistances :: Graph -> Distances -> Distances
-shortestDistances g dists = foldl' update dists vs
+shortestDistances g (Distances dists) = Distances $ foldl' update dists vs
   where
     vs = vertices g
     update d k = IM.mapWithKey shortmap d

@@ -1,4 +1,4 @@
-module Test.Graph.AdjacencyList.WFI where
+module Test.Graph.AdjacencyList.Metrics where
 
 import Data.Maybe
 import Data.List
@@ -12,15 +12,17 @@ import Data.Graph.AdjacencyList
 import Data.Graph.AdjacencyList.Grid
 
 import Data.Graph.AdjacencyList.WFI
+import Data.Graph.AdjacencyList.Metrics
 
 fastTests :: [Test]
-fastTests = [ testWFI1
-            , testWFI2
-            , testDisconnected
+fastTests = [ testEccentricity
+            , testRadius
+            , testDiameter
+            , testDensity
             ]
 
 -- | DAG
-graphTestWFI = 
+graphTest = 
   let vs = [1..8]
       neis = (\v -> let nei 1 = [2,5,6]
                         nei 2 = [3,5]
@@ -50,35 +52,41 @@ graphTestDisco =
              )
    in createGraph vs neis
 
-testWFI1 :: Test
-testWFI1 = do
-  let name = "Test Shortest paths Floyd-Warshall algorithm on a directed graph"
-      (Distances dists) = unweightedShortestDistances graphTestWFI
-      out :: [(Vertex,Rational)]
-      out = IM.toList $ fromJust $ IM.lookup 1 $ dists
-      expe = [(1,0),(2,1),(3,2),(4,2),(5,1),(6,1),(7,2),(8,2)]
+testEccentricity :: Test
+testEccentricity = do
+  let name = "Eccentricity of vertex 2 in test graph"
+      dists = unweightedShortestDistances graphTest
+      out = graphEccentricity 2 dists
+      expe = Just 3
    in case out == expe of
-        True -> testPassed name $ "passed!"
+        True -> testPassed name $ "passed! " <> (show out)
+        False -> testFailed name $ (,) (show dists) (show out)
+
+testRadius :: Test
+testRadius = do
+  let name = "Radius of test graph should be 1 (8-7)"
+      dists = unweightedShortestDistances graphTest
+      out = graphRadius dists
+      expe = Just 1
+   in case out == expe of
+        True -> testPassed name $ "passed! "
         False -> testFailed name $ (,) (show expe) (show out)
 
-testWFI2 :: Test
-testWFI2 = do
-  let name = "Test Shortest paths Floyd-Warshall algorithm undirected graph"
-      (Distances dists) = unweightedShortestDistances $ makeUndirected graphTestWFI
-      out :: [(Vertex,Rational)]
-      out = IM.toList $ fromJust $ IM.lookup 1 $ dists
-      expe = [(1,0),(2,1),(3,2),(4,2),(5,1),(6,1),(7,2),(8,2)]
+testDiameter :: Test
+testDiameter = do
+  let name = "Diameter 3 (2-7)"
+      dists = unweightedShortestDistances graphTestDisco
+      out = graphDiameter dists
+      expe = Just 3
    in case out == expe of
-        True -> testPassed name $ "passed!" 
+        True -> testPassed name $ "passed! "
         False -> testFailed name $ (,) (show expe) (show out)
 
-testDisconnected :: Test
-testDisconnected = do
-  let name = "Test Shortest paths Floyd-Warshall algorithm on disconnected graph"
-      (Distances dists) = unweightedShortestDistances graphTestDisco
-      out :: [(Vertex,Rational)]
-      out = IM.toList $ fromJust $ IM.lookup 1 $ dists
-      expe = [(1,0),(2,1),(3,2),(4,2),(5,1),(6,1),(7,2),(8,2)]
+testDensity :: Test
+testDensity = do
+  let name = "Density of testgraph should be 13/56"
+      out = graphDensity graphTest
+      expe = 13 / 56
    in case out == expe of
-        True -> testPassed name $ "passed!" <> (show dists)
+        True -> testPassed name $ "passed! "
         False -> testFailed name $ (,) (show expe) (show out)

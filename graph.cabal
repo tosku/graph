@@ -11,7 +11,7 @@ homepage:       https://github.com/tosku/graph#readme
 bug-reports:    https://github.com/tosku/graph/issues
 author:         Thodoris Papakonstantinou
 maintainer:     mail@tpapak.com
-copyright:      2017 Thodoris Papakonstantinou
+copyright:      2018 Thodoris Papakonstantinou
 license:        GPL-3
 build-type:     Simple
 cabal-version:  >= 1.10
@@ -33,6 +33,7 @@ library
                      , Data.Graph.AdjacencyList.BFS
                      , Data.Graph.AdjacencyList.DFS
                      , Data.Graph.AdjacencyList.WFI
+                     , Data.Graph.AdjacencyList.Metrics
                      , Data.Graph.AdjacencyList.PushRelabel.Internal
                      , Data.Graph.AdjacencyList.PushRelabel.Pure
   build-depends:       base >= 4.7 && < 5
@@ -43,7 +44,6 @@ library
                      , Unique
                      , either-unwrap >= 1.1
                      , async >= 2.1.1
-                     , array
   default-language: Haskell2010
 
 test-suite graph-test
@@ -56,6 +56,7 @@ test-suite graph-test
                 , Test.Graph.AdjacencyList.BFS
                 , Test.Graph.AdjacencyList.DFS
                 , Test.Graph.AdjacencyList.WFI
+                , Test.Graph.AdjacencyList.Metrics
                 , Test.Graph.AdjacencyList.PushRelabel.Pure
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
@@ -68,3 +69,18 @@ test-suite graph-test
     , vector
     , ansi-terminal
   default-language: Haskell2010
+
+executable plot-graph
+  main-is: Main.hs
+  other-modules:     
+      PlotAdjacencyListGraph
+  hs-source-dirs:
+      plot
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , containers >= 0.5.10.2
+    , graphviz
+    , graph
+  default-language: Haskell2010
+

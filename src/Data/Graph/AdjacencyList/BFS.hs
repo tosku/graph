@@ -31,7 +31,7 @@ data BFS = BFS { frontier :: Set.IntSet
                , level :: IM.IntMap Int -- ^ Keeps level of vertex
                , parent :: IM.IntMap Vertex -- ^ Gives parent of vertex
                , maxLevel :: Int
-               , topSort :: [Vertex]
+               , topSort :: [Vertex] -- ^ Is true topological sorting in DAGs
                } deriving (Eq, Show)
 
 initialBFS :: Vertex -> BFS
@@ -69,11 +69,12 @@ bfs g s =
                            (\ac v -> IM.insert v newLevel ac) 
                            oldLevels newFrontiers
                  bbfs = breadthFirstSearch (b { frontier = newFrontiers
-                            , level = newLevels 
-                            , parent = newParents
-                            , maxLevel = newLevel
-                            , topSort = (topSort b) ++ Set.toList oldFrontiers
-                            })
+                                              , level = newLevels 
+                                              , parent = newParents
+                                              , maxLevel = newLevel
+                                              , topSort = (topSort b) 
+                                              ++ Set.toList oldFrontiers
+                                            })
                in bbfs
    in breadthFirstSearch sbfs
 
