@@ -12,6 +12,7 @@ Portability : POSIX
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE BangPatterns #-}
 
 
 module Data.Graph.AdjacencyList.DFS

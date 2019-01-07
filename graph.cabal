@@ -5,7 +5,7 @@
 -- hash: 8bb63f27a1239b658115019c596c9ea157fc0d7c499ee7ca62ecb24c2058a406
 
 name:           graph
-version:        0.2.3.0
+version:        0.3.0.0
 description:    Graph library
 homepage:       https://github.com/tosku/graph#readme
 bug-reports:    https://github.com/tosku/graph/issues
@@ -69,18 +69,3 @@ test-suite graph-test
     , vector
     , ansi-terminal
   default-language: Haskell2010
-
-executable plot-graph
-  main-is: Main.hs
-  other-modules:     
-      PlotAdjacencyListGraph
-  hs-source-dirs:
-      plot
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      base >=4.7 && <5
-    , containers >= 0.5.10.2
-    , graphviz
-    , graph
-  default-language: Haskell2010
-
