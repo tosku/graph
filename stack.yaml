@@ -4,7 +4,7 @@ packages:
 extra-deps:
 - natural-numbers-0.1.2.0
 - git: git@github.com:tosku/tesths
-  commit: fead8353b72918241d306f57126bbb5fde4eeb5a
+  commit: a2927de94ead1a6f4235cbc202f435a575cac03a
 - Unique-0.4.7.5
 - either-unwrap-1.1
 allow-newer: true

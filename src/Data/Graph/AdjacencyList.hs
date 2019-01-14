@@ -15,6 +15,7 @@ which is the function equivalent of the adjacency list.
  -}
 
 {-# LANGUAGE BangPatterns #-}  
+{-# LANGUAGE DeriveGeneric #-}  
 
 module Data.Graph.AdjacencyList
     ( Vertex (..)
@@ -27,7 +28,7 @@ module Data.Graph.AdjacencyList
     , toTuple
     -- * createGraph: Graph constructor
     , createGraph
-    -- * graphfromEdges
+    -- * graph from list of Edges
     , graphFromEdges
     , edges
     , reverseEdge
@@ -57,11 +58,14 @@ import Data.Maybe
 import qualified Data.Map.Lazy as M
 import qualified Data.IntMap.Lazy as IM
 import qualified Data.Set as Set
+import qualified GHC.Generics as Gen
+import qualified Data.Binary as Bin
 
 type Vertex = Int
 
 data Edge = Edge Vertex Vertex 
-  deriving (Ord)
+  deriving (Ord, Gen.Generic)
+instance Bin.Binary Edge
 
 instance Show Edge where
  show (Edge s t) = "[" ++ show s ++ "->" ++ show t ++ "]"

@@ -3,6 +3,7 @@ module Test.Graph.AdjacencyList where
 import Data.Bifunctor
 import Data.List
 import Data.List.Unique
+import qualified Data.Binary as Bin
 
 import TestHS
 

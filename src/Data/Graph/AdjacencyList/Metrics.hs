@@ -37,15 +37,21 @@ graphRadius :: Distances -> Maybe Weight
 graphRadius dis =
   let (Distances dism) = dis
       vs = IM.keys dism
-   in minimum $ filter (\d -> d /= Just 0 && d /= Nothing) 
-     $ map (\v -> graphEccentricity v dis) vs
+      filtdis = filter (\d -> d /= Just 0 && d /= Nothing) 
+         $ map (\v -> graphEccentricity v dis) vs
+   in if null filtdis
+         then Nothing
+         else minimum filtdis
 
 graphDiameter :: Distances -> Maybe Weight
 graphDiameter dis =
   let (Distances dism) = dis
       vs = IM.keys dism
-   in maximum $ filter (\d -> d /= Just 0 && d /= Nothing) 
-     $ map (\v -> graphEccentricity v dis) vs
+      filtdis = filter (\d -> d /= Just 0 && d /= Nothing) 
+        $ map (\v -> graphEccentricity v dis) vs
+   in if null filtdis
+         then Nothing
+         else maximum filtdis
 
 -- | Since the representation of undirected graphs dublicated edges no need for
 -- undirected version of density

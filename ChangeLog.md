@@ -1,4 +1,10 @@
 # Changelog for graph
+- 0.3.2.0
+  Binary instance of [Edge] so can deserialize Graphs
+- 0.3.1.0
+  fixed minimum/maximum bug in empty list (Metrics.hs)
+- 0.3.0.0
+  moved graphviz interface to new package
 - 0.2.3.0
   Distance metrics and plot function using graphviz
 - 0.2.2.0

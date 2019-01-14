@@ -19,3 +19,5 @@ main = do
     ++ PRP.fastTests
     ++ WFI.fastTests
     ++ Met.fastTests
+  T.reportTestsIO 
+    Met.ioTests

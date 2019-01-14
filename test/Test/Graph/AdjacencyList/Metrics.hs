@@ -14,12 +14,19 @@ import Data.Graph.AdjacencyList.Grid
 import Data.Graph.AdjacencyList.WFI
 import Data.Graph.AdjacencyList.Metrics
 
+import qualified Data.Binary as Bin
+
 fastTests :: [Test]
 fastTests = [ testEccentricity
             , testRadius
             , testDiameter
             , testDensity
             ]
+
+ioTests :: [IO Test]
+ioTests = [ test481150
+          , test480967
+          ]
 
 -- | DAG
 graphTest = 
@@ -90,3 +97,29 @@ testDensity = do
    in case out == expe of
         True -> testPassed name $ "passed! "
         False -> testFailed name $ (,) (show expe) (show out)
+
+test481150 :: IO Test
+test481150 = do
+  let name = "compare with netmeta's distance matrix network 481150"
+  es <- Bin.decodeFile "test/481150.edges"
+  let gr = graphFromEdges es
+      dists = unweightedShortestDistances $ makeUndirected gr
+      rad = graphRadius dists
+      diam = graphDiameter dists
+      expe = (Just 2, Just 2)
+   in case (rad, diam) == expe of
+        True -> return $ testPassed name $ "passed! " <> (show dists)
+        False -> return $ testFailed name $ (,) (show expe) (show rad)
+
+test480967 :: IO Test
+test480967 = do
+  let name = "compare with netmeta's distance matrix network 480967"
+  es <- Bin.decodeFile "test/480967.edges"
+  let gr = graphFromEdges es
+      dists = unweightedShortestDistances $ makeUndirected gr
+      rad = graphRadius dists
+      diam = graphDiameter dists
+      expe = (Just 2, Just 3)
+   in case (rad, diam) == expe of
+        True -> return $ testPassed name $ "passed! "
+        False -> return $ testFailed name $ (,) (show expe) (show rad)
