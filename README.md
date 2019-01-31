@@ -11,7 +11,7 @@ Top performing pure Haskell graph library using adjacency list graph representat
 - Max flow:
   - Push Relabel: Tide Algorithm or push-pull-relabel
 
-##Install and building
+## Install and building
 You will need haskell by installing [stack](https://docs.haskellstack.org/en/stable/README/)
 
 ```
@@ -20,5 +20,5 @@ cd graph
 stack build
 ```
 
-##For testing
+## For testing
 `stack test`
