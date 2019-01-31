@@ -1,6 +1,6 @@
 {-|
 Module      : PushRelabel - Pure
-Description : Maximum Flow - Push relabel - Loom Algorithm
+Description : Maximum Flow - Push relabel - Tide Algorithm
 Copyright   : Thodoris Papakonstantinou, 2017
 License     : GPL-3
 Maintainer  : mail@tpapak.com
@@ -8,22 +8,24 @@ Stability   : experimental
 Portability : POSIX
 
 
-= Loom - Push Pelabel
-The loom algorithm is a push relabel implementation for solving the 
+= Tide - Push (Pull) Relabel
+The tide algorithm is a push relabel implementation for solving the 
  [max flow problem](https://en.wikipedia.org/wiki/Push%E2%80%93relabel_maximum_flow_algorithm#Practical_implementations) 
 The algorithm is tested on directed graphs.
 
 === Definitions
 A network \( N \) is defined by a directed graph \( G \) its source and sink \(s,t\) and the capacities \(C : E \rightarrow R^+ \) 
 Following push-relabel's terminology the residual graph \(R\) is a network containing both original edges of \(G\) (forward edges) and backward (reverse) edges, with the additional properties of __preflow__ \(F : E_R \rightarrow R^+ \) on the forward edges and residual capacities \(C_R\) on all edges of \(R\) as well as the following properties on the vertices:
-- Height \(H: V \rightarrow R^+\) which determines whether preflow can be pushed through an edge.
-- Excess \(X:  V \rightarrow R^+\) recording the excess flow of each vertex. 
+
+* Height \(H: V \rightarrow R^+\) which determines whether preflow can be pushed through an edge.
+* Excess \(X:  V \rightarrow R^+\) recording the excess flow of each vertex. 
 When the algorithm terminates all excess is \(0\) and the preflow of each edges is
 the actual maximum flow of \(N\).
+* Level \(L:  V \rightarrow R^+\) is the shortest distance from the source in the original graph \( G \) and therefor is constant during the process. The level is needed to define the order by which flow is pushed.
 
 === Operations
 The main difference in the definitions lies in the split of the PR push operation
-into two, depending on whether it is performed in a forward edge or backward
+into two, depending on whether it is performed in a forward edge or reverse
 edge. The former operation is called __push__ (from now on, /push/ will be used in
 this context) and the latter __pull__.
 Relabel is the usual PR adjusting of heights.
@@ -31,11 +33,20 @@ Relabel is the usual PR adjusting of heights.
 /PR/ guaranties that there is a cut between the source and sink in the residual
 graph partitioning \(R\) into \(S\) and \(T\) vertices.
 
-The algorithm is iterative and each iteration consists of three steps
+The tide algorithm is iterative and each iteration consists of three steps (tides)
 
 1. global-relabel
+  Labels vertices from their distances from source and sink,
+  by doing breadth first searches.
+  Heights for the source partition vertices is N \+ their distance to the source
+  and heights for the sink equal the distance from the sink.
 2. global-push
+  Pushes flow through all eligible __forward__ edges in the residual graph. 
+  The push followes the level of the vertices. That means the push is done from the source to the sink starting from the sink then the vertices with level 1 then those of level 2 and so on.
 3. global-pull
+  Global pull on the other side is done starting by the sink and going back until we reach the sink pulling (increasing preflow) only on __reverse edges.
+
+The order of the global pushes and pulls is always the same and is dictated by the breadth first search of the original graph (which gives the levels). After adequate iterations of these three steps (tides) we reach the maximum flow.
 
  -}
 
@@ -55,11 +66,13 @@ import Data.Graph.AdjacencyList.Network
 import Data.Graph.AdjacencyList.PushRelabel.Internal
 import qualified Data.Graph.AdjacencyList.BFS as BFS
 
--- | Implementation of the push relabel algorithm
+-- | Implementation of the push relabel algorithm. Initialize Residual graph
+-- from a network and runs the tide algorithm checking for various possible
+-- errors in the process.
 pushRelabel :: Network -> Either String ResidualGraph
 pushRelabel net =
   let initg = initializeResidualGraph net
-      res = loom initg 0
+      res = tide initg 0
       nvs = vertices $ graph $ network res
       s = source net
       t = sink net
@@ -89,41 +102,48 @@ pushRelabel net =
                         ++ " overflowings are " ++ show (overflowing res)
                         ++ " nevertices are " ++ show (netVertices res)
 
--- | The main part of the algorithm. 
-loom :: ResidualGraph -> Int -> ResidualGraph 
-loom rg steps = 
+-- | The main part of the algorithm. It is a recursive algorithm consisting of a
+-- global relabel, followed by a global push and then a global pull. When the
+-- flow and the overflowing vertices don't change max flow is achieved.
+tide :: ResidualGraph -> Int -> ResidualGraph 
+tide rg steps = 
   let g = rg `seq` (graph $ network rg)
       s = source $ network rg
       t = sink $ network rg
       es = edges g
       vs = vertices g
       olf = netFlow rg
-      bfsrg = bfsRelabel rg
-      rg' = prePush $ prePull bfsrg 
+      bfsrg = globalRelabel rg -- first do global relabel
+      rg' = globalPush $ globalPull bfsrg -- then global push and then global pull
       nfl = netFlow rg'
       steps' = steps + 1
       oovfls = overflowing rg
       novfls = overflowing rg'
-   in if nfl == olf 
+   in if nfl == olf -- if new flow == old flow 
          then 
-           if oovfls == novfls
-              then rg' { network = networkFromResidual rg'
+           if oovfls == novfls -- and the overflowing nodes didn't change
+              then rg' { network = networkFromResidual rg' -- algorithm ends
                        , steps = steps'}
-              else loom rg' steps'
-         else loom rg' steps'
+              else tide rg' steps'
+         else tide rg' steps'
 
--- | Pushes flow through edges with starting vertices which are the ends of source edges 
--- (U) and ending edges that are the start of sink edges (V)
-prePush :: ResidualGraph -> ResidualGraph 
-prePush rg = 
+-- | Pushes flow starting with vertices closer to the source and moving towards
+-- the sink. Only forward edges are chosen to increase preflow.
+-- The order of vertices picked follows the shortest distance of the vertices from the source in 
+-- the original graph. Thus global-push is a __left fold__ on the overflowing vertices.
+-- (The overflowing vertices are ordered according to their level)
+globalPush :: ResidualGraph -> ResidualGraph 
+globalPush rg = 
   let ovfs = overflowing rg
    in IM.foldl' (\ac lset -> 
          Set.foldl' (\ac' v -> pushNeighbors ac' v)
          ac lset
       ) rg ovfs
 
-prePull :: ResidualGraph -> ResidualGraph 
-prePull rg = 
+-- | Global pull is the oposite of the global-push meaning preflow is increased
+-- only in reverse (residual) edges and the order of pulls is from the sink to the source.
+-- It is a __right fold__ on the overflowing vertices.
+globalPull rg = 
   let ovfs = overflowing rg
    in IM.foldr' (\lset ac -> 
          Set.foldl' (\ac' v -> pullNeighbors ac' v)
@@ -142,7 +162,7 @@ pushNeighbors g v =
                     Nothing -> ac
                     Just g'' -> g'') g feds
 
--- | Push through all (backward) meaning pull all residual neighbors
+-- | Push through all (reverse) meaning pull all residual neighbors
 pullNeighbors :: ResidualGraph -> Vertex -> ResidualGraph
 pullNeighbors g v =
   let neimap = netNeighborsMap g
@@ -155,8 +175,8 @@ pullNeighbors g v =
                       Just g'' -> g'') g reds
 
 -- | Global relabel according to bfs from source and sink
-bfsRelabel :: ResidualGraph -> ResidualGraph
-bfsRelabel rg =
+globalRelabel :: ResidualGraph -> ResidualGraph
+globalRelabel rg =
   let g = graph $ network rg
       sh = numVertices g
       (slvs, tlvs) = residualDistances rg

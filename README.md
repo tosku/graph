@@ -9,4 +9,4 @@ Top performing pure Haskell graph library using adjacency list graph representat
 - Searches: 
  - BFS: breadth first search traversal
 - Max flow:
-  - Push Relabel: Loom Algorithm or push-pull-relabel
+  - Push Relabel: Tide Algorithm or push-pull-relabel

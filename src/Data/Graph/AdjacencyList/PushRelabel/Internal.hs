@@ -22,7 +22,7 @@ module Data.Graph.AdjacencyList.PushRelabel.Internal
   , Flow 
   , Height
   , Excess
-  , Level
+  , Level -- * Shortest distance from source
   , initializeResidualGraph
   , level
   , excess
@@ -54,7 +54,7 @@ import qualified Data.Graph.AdjacencyList.BFS as BFS
 
 type Height = Int
 type Excess = Capacity
-type Level = Int
+type Level = Int -- ^ Shortest distance from source
 
 data ResidualVertex = ResidualVertex !Vertex !Level !Height !Excess
   deriving (Eq)
@@ -80,6 +80,8 @@ type ResidualEdges = IM.IntMap ResidualEdge
 
 type NeighborsMap = IM.IntMap ([Vertex], [Vertex])
 
+-- | Keys are the level (shortest distance from source) and the value is the set
+-- of overflowing vertices
 type Overflowing = IM.IntMap Set.IntSet
 
 data ResidualGraph = 
@@ -144,6 +146,8 @@ sourceEdgesCapacity net =
   let ses = sourceEdges net
    in sum $ map snd ses
 
+-- | Set adjacent to source vertices heigts to \(N\) and their excesses accordingly
+-- given that initial source edges will be saturated
 initializeVertices :: Network -> ResidualVertices
 initializeVertices net =
   let g = graph net
@@ -163,6 +167,7 @@ initializeVertices net =
          in (cx-c, IM.adjust (const (ResidualVertex v (fl v) 0 c)) v ac)) (0, zvs) ses
    in IM.insert s (ResidualVertex s 0 sh sx) nvs
 
+-- | Saturate source edges with flow the other ones set flow to 0
 initializeEdges :: Network -> ResidualEdges
 initializeEdges net =
   let g = graph net

@@ -1,4 +1,6 @@
 # Changelog for graph
+- 0.3.2.1
+  Documentation on the Push-Relabel Tide algorithm
 - 0.3.2.0
   Binary instance of [Edge] so can deserialize Graphs
 - 0.3.1.0
