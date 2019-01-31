@@ -44,7 +44,7 @@ The tide algorithm is iterative and each iteration consists of three steps (tide
   Pushes flow through all eligible __forward__ edges in the residual graph. 
   The push followes the level of the vertices. That means the push is done from the source to the sink starting from the sink then the vertices with level 1 then those of level 2 and so on.
 3. global-pull
-  Global pull on the other side is done starting by the sink and going back until we reach the sink pulling (increasing preflow) only on __reverse edges.
+  Global pull on the other side is done starting by the sink and going back until we reach the sink pulling (increasing preflow) only on __reverse__ edges.
 
 The order of the global pushes and pulls is always the same and is dictated by the breadth first search of the original graph (which gives the levels). After adequate iterations of these three steps (tides) we reach the maximum flow.
 

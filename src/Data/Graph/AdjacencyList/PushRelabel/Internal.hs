@@ -17,6 +17,7 @@ module Data.Graph.AdjacencyList.PushRelabel.Internal
   , NeighborsMap
   , ResidualVertex (..)
   , ResidualEdge (..)
+  , Overflowing (..)
   , Capacity (..)
   , Capacities (..)
   , Flow 
