@@ -11,13 +11,14 @@ Portability : POSIX
  -}
 
 
-module Graph.PushRelabel.STM
+module Data.Graph.AdjacencyList.PushRelabel.STM
   (
-    ResidualGraph (..)
+    --ResidualGraph (..)
   {-, pushRelabel-}
   {-, netFlow-}
   ) where
 
+{-
 import Data.List
 import Data.Maybe
 import qualified Data.Map.Lazy as M
@@ -56,7 +57,6 @@ data ResidualGraphSTM = ResidualGraphSTM
   }
   deriving (Eq)
 
-{-
 initializeResidualGraph :: Network -> IO ResidualGraph
 initializeResidualGraph net = do
   vs <- initializeVertices net
