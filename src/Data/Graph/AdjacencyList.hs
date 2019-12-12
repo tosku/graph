@@ -49,6 +49,7 @@ module Data.Graph.AdjacencyList
     , to
     , numVertices
     , numEdges
+    , removeReverseEdges
     , completeGraph
     ) where
 
@@ -222,10 +223,19 @@ makeUndirected g =
          in sortUniq $ nei ++ rnei
    in createGraph vs newnei
 
+-- | Make a graph directed by removing randomly reverse edges
+removeReverseEdges :: Graph -- ^ Graph with reverse edges
+                   -> Graph -- ^ Directected graph
+removeReverseEdges g =
+  let unes = sort $ edges g
+      dires = filter (\e -> elem (reverseEdge e) 
+                             (filter (\e' -> e' > e) unes) 
+                     ) unes
+   in graphFromEdges dires
+
+
 -- | Complete undirected graph from number of vertices
 completeGraph :: Int -> Graph
 completeGraph n =
   let es = [e | e <- Edge <$> [1..n] <*> [1..n], (\(Edge s t) -> s /= t ) e]
    in graphFromEdges es
-
-

@@ -12,6 +12,7 @@ import Data.Graph.AdjacencyList.Grid
 
 fastTests :: [Test]
 fastTests = [ test1
+            , testRemoveReverseEdges
             ]
 
 edgesTest1 = map fromTuple 
@@ -43,3 +44,25 @@ test1 = do
   case gr1 == graphTest1 of
     True -> testPassed name "passed!"
     False -> testFailed name $ (,) (show graphTest1) (show gr1)
+
+testRemoveReverseEdges :: Test
+testRemoveReverseEdges = do
+  let name = "Remove reverse edges from komplete 5 graph"
+      k5 = completeGraph 5
+      dk5 = removeReverseEdges k5
+      expected = [ (Edge 1 2)
+                 , (Edge 1 3)
+                 , (Edge 1 4)
+                 , (Edge 1 5)
+                 , (Edge 2 3)
+                 , (Edge 2 4)
+                 , (Edge 2 5)
+                 , (Edge 3 4)
+                 , (Edge 3 5)
+                 , (Edge 4 5)
+                 ]
+  if edges dk5 == expected
+    then 
+      testPassed name "passed!"
+    else 
+      testFailed name $ (,) (show expected) (show dk5)
