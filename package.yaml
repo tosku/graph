@@ -1,5 +1,5 @@
 name:                graph
-version:             0.4.0.0
+version:             0.4.0.1
 github:              "tosku/graph"
 license:             GPL-3
 author:              "Thodoris Papakonstantinou"
@@ -29,7 +29,7 @@ library:
   - natural-numbers >= 0.1.2.0
   - containers >= 0.5.10.2
   - text >= 1.2.2.2
-  - Unique
+  - Unique >= 0.4.7.9
   - either-unwrap >= 1.1
   - async >= 2.1.1
   - binary >= 0.8.6.0

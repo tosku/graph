@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8fd5ae37885d034579839cbe119201e7b6eca7f74d760c4a4459f14dc3edb3c9
+-- hash: 8b81139602ae8d7f8dda8fecf71a3e2ebeb259ed71bdc7e7235c65f22ec855be
 
 name:           graph
 version:        0.4.0.0
@@ -44,7 +44,7 @@ library
   hs-source-dirs:
       src
   build-depends:
-      Unique
+      Unique >=0.4.7.9
     , async >=2.1.1
     , base >=4.7 && <5
     , binary >=0.8.6.0
