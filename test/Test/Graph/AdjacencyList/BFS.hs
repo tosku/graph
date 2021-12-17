@@ -19,6 +19,8 @@ import Data.Graph.AdjacencyList.Grid
 fastTests :: [Test]
 fastTests = [ test1
             , test2
+            , spanningtreetest
+            , spanningtreeUndirected
             ]
 
 
@@ -60,3 +62,22 @@ test2 = do
     True -> testPassed name $ "passed!"
     False -> testFailed name $ (,) ("\n" ++ show expe) 
       ("\n" ++ show out ++ "\n" ++ show latbfs ++ "\n" ++ show lat)
+
+spanningtreetest :: Test
+spanningtreetest = do
+  let name = "Get Spanning Tree from BFS"
+      out = spanningTree $ bfs graphTest1 1
+      expe = map fromTuple [(1,2),(2,3),(5,4),(1,5),(1,6),(5,7)]
+   in case  out == expe of
+        True -> testPassed name "passed!"
+        False -> testFailed name $ (,) (show expe) (show out)
+
+spanningtreeUndirected :: Test
+spanningtreeUndirected = do
+  let name = "Get Spanning Tree from BFS undirected graph"
+      ungr = makeUndirected graphTest1
+      out = spanningTree $ bfs ungr 1
+      expe = map fromTuple [(1,2),(2,3),(5,4),(1,5),(1,6),(5,7)]
+   in case  out == expe of
+        True -> testPassed name "passed!"
+        False -> testFailed name $ (,) (show expe) (show out)

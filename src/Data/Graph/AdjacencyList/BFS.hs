@@ -18,9 +18,11 @@ module Data.Graph.AdjacencyList.BFS
   ( bfs
   , adjBFS
   , BFS (..)
+  , spanningTree
   ) where
 
 import Data.List
+import Data.Tuple
 import Data.Maybe
 import qualified Data.IntMap as IM
 import qualified Data.IntSet as Set
@@ -36,11 +38,11 @@ data BFS = BFS { frontier :: Set.IntSet
 
 initialBFS :: Vertex -> BFS
 initialBFS s = BFS { frontier = Set.singleton s
-                      , level = IM.fromList [(s,0)]
-                      , parent= IM.empty
-                      , maxLevel = 0
-                      , topSort = []
-                      }
+                   , level = IM.fromList [(s,0)]
+                   , parent= IM.empty
+                   , maxLevel = 0
+                   , topSort = []
+                   }
 
 -- | BFS for implicit neighbor definition (grids, infinite graphs)
 bfs :: Graph -> Vertex -> BFS
@@ -112,3 +114,8 @@ adjBFS neimap s = breadthFirstSearch sbfs
                              , maxLevel = newLevel
                              , topSort = (topSort b) ++ Set.toList oldFrontiers
                              })
+
+spanningTree :: BFS -> [Edge]
+spanningTree b = 
+  map (fromTuple . swap) $ IM.toList $ parent b
+

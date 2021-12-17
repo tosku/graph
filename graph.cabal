@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8b81139602ae8d7f8dda8fecf71a3e2ebeb259ed71bdc7e7235c65f22ec855be
+-- hash: 72925bef84d220e69fba0c8241a076410ae4ee258b24392d4eb9533d42d7059a
 
 name:           graph
-version:        0.4.0.0
+version:        0.4.1.1
 synopsis:       Graph library using adjacency list representation
 description:    Please see the README on GitHub at <https://github.com/tosku/graph#readme>
 category:       Graph theory
