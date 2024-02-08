@@ -16,8 +16,7 @@ following conventional vertex labeling.
  -}
 
 module Data.Graph.AdjacencyList.Grid
-    ( Natural
-    , L
+    ( L
     , D
     , fromTuple
     , toTuple
@@ -38,7 +37,7 @@ module Data.Graph.AdjacencyList.Grid
 
 import Data.List
 import qualified Data.Map.Lazy as M
-import Data.Natural
+import Numeric.Natural
 
 import Data.Graph.AdjacencyList
 

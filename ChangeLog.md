@@ -1,4 +1,6 @@
 # Changelog for graph
+- 0.6.0.1
+  Updated ghc - removed Data.Natural 
 - 0.3.2.1
   Documentation on the Push-Relabel Tide algorithm
 - 0.3.2.0

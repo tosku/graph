@@ -1,14 +1,14 @@
 flags: {}
 
-resolver: lts-18.18
+resolver: lts-22.7
 
 packages:
 - .
 extra-deps:
-- natural-numbers-0.1.2.0
+#- natural-numbers-0.1.2.0
 #- ../tesths
 - git: https://github.com/tosku/tesths
-  commit: 988947d4b8ead71811737b44ee9ea452554d497d
+  commit: 0695d236d707bb68ca2ade5fc45aca0a416983f2
 - Unique-0.4.7.9
 #- either-unwrap-1.1
 allow-newer: true

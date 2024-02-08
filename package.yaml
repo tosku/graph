@@ -1,10 +1,10 @@
 name:                graph
-version:             0.4.1.1
+version:             0.6.0.1
 github:              "tosku/graph"
 license:             GPL-3
 author:              "Thodoris Papakonstantinou"
 maintainer:          "hi@tpapak.com"
-copyright:           "Thodoris Papakonstantinou, 2019"
+copyright:           "Thodoris Papakonstantinou, 2024"
 
 extra-source-files:
 - README.md
@@ -20,18 +20,17 @@ category:            Graph theory
 description:         Please see the README on GitHub at <https://github.com/tosku/graph#readme>
 
 dependencies:
-- base >= 4.7 && < 5
+- base >= 4.8
 
 library:
   source-dirs: src
   dependencies:
   - mtl >= 2.2.1
-  - natural-numbers >= 0.1.2.0
+  #- natural-numbers 
   - containers >= 0.5.10.2
   - text >= 1.2.2.2
   - Unique >= 0.4.7.9
   - either-unwrap >= 1.1
-  - async >= 2.1.1
   - binary >= 0.8.6.0
   #exposed-modules:     Data.Graph.AdjacencyList
                      #, Data.Graph.AdjacencyList.Grid
@@ -52,8 +51,8 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - base >=4.7 && <5
-    - tesths >= 0.1.1.0
+    - base >=4.7
+    - tesths >= 0.2.2.1
     - graph
     - Unique
     - fgl >= 5.5.3.1

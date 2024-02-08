@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 72925bef84d220e69fba0c8241a076410ae4ee258b24392d4eb9533d42d7059a
+-- hash: 694a731271cff31080521f4962bd62b6b61207c69499faa7d78446371c1ece76
 
 name:           graph
-version:        0.4.1.1
+version:        0.6.0.1
 synopsis:       Graph library using adjacency list representation
 description:    Please see the README on GitHub at <https://github.com/tosku/graph#readme>
 category:       Graph theory
@@ -15,7 +15,7 @@ homepage:       https://github.com/tosku/graph#readme
 bug-reports:    https://github.com/tosku/graph/issues
 author:         Thodoris Papakonstantinou
 maintainer:     hi@tpapak.com
-copyright:      Thodoris Papakonstantinou, 2019
+copyright:      Thodoris Papakonstantinou, 2024
 license:        GPL-3
 license-file:   LICENSE
 build-type:     Simple
@@ -45,13 +45,11 @@ library
       src
   build-depends:
       Unique >=0.4.7.9
-    , async >=2.1.1
-    , base >=4.7 && <5
+    , base >=4.8
     , binary >=0.8.6.0
     , containers >=0.5.10.2
     , either-unwrap >=1.1
     , mtl >=2.2.1
-    , natural-numbers >=0.1.2.0
     , text >=1.2.2.2
   default-language: Haskell2010
 
@@ -73,11 +71,11 @@ test-suite meta-springs-test
   build-depends:
       Unique
     , ansi-terminal
-    , base >=4.7 && <5
+    , base >=4.7
     , binary >=0.8.6.0
     , containers >=0.5.10.2
     , fgl >=5.5.3.1
     , graph
-    , tesths >=0.1.1.0
+    , tesths >=0.2.2.1
     , vector
   default-language: Haskell2010
